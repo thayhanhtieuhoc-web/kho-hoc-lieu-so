@@ -350,7 +350,7 @@ $('word').onclick=()=>tai(taoWord(),'Danh-muc-hoc-lieu-so-Tran-Huu-Hanh.docx');
 if(DANG.trang)$('qrt').append(ve(DANG.trang),'Quét để mở kho');
 /* ---- Góp ý, đề xuất ---- */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-gopy]');if(!b)return;const d=b.closest('dialog');if(d)d.close();$('fgy').muc.value=b.dataset.gopy.slice(0,160);toiMuc('gop-y');setTimeout(()=>$('fgy').nd.focus({preventScroll:true}),60)});
-const APIGY="",coAPI=/^https:/.test(APIGY);
+const APIGY="https://script.google.com/macros/s/AKfycbzmU4cazNfaJKqTbvCm9fc_Q-r7VVF-96cM95BD1Gf8zd9F5iRVup7MrfjnRlozGANsZA/exec",coAPI=/^https:/.test(APIGY);
 function moGY(){
  if(!$('dgy').children.length)$('dgy').innerHTML=[...new Set([...DANG.muc.filter(congKhai).map(x=>x.ten),...(window.KB_ALL?KB_ALL():[]).filter(x=>x.m!='Cả tuần').map(x=>`Lớp ${x.l}, tuần ${x.t}: ${x.n}`)])].map(t=>`<option value="${E(t)}">`).join('');
  if(!coAPI)$('gyg').textContent='Chép nội dung, mở Zalo';else if(!moGY.da){moGY.da=1;fetch(APIGY+'?a=gopy').then(x=>x.json()).then(x=>{if(x.ok&&x.ds&&x.ds.length)$('tt-gy').innerHTML='<h2>Góp ý đã tiếp thu</h2><ul>'+x.ds.map(g=>`<li><b>${E(g.nd)}</b>\n${E(g.tl)} <span class="nho">(${E(g.ngay)})</span></li>`).join('')+'</ul>'}).catch(()=>{})}}
