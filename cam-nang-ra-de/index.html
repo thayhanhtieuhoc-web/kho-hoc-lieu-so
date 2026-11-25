@@ -1,0 +1,396 @@
+<title>Cẩm nang ra đề Tiểu học</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: một cột như tờ giấy kiểm tra; bảng chọn lớp – môn ghim trên đầu; câu lệnh là "phiếu" có nút sao chép */
+:root{
+  --paper:#fbfcfe; --sheet:#ffffff; --ink:#1c2b4a; --muted:#5b6b85; --line:#dfe5ef; --grid:#eef2f8;
+  --pen:#c4322f; --pen-soft:#fbeceb; --ok:#2f7a4f; --ok-soft:#e8f4ec; --note:#8a5a00; --note-soft:#fdf4e2;
+  --f-display:"Lora",Georgia,"Times New Roman",serif; --f-body:"Be Vietnam Pro","Segoe UI",Arial,sans-serif; --f-mono:"Roboto Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#111827; --sheet:#172033; --ink:#e6ecf7; --muted:#a3b0c7; --line:#2a3650; --grid:#1a2438;
+  --pen:#f0716b; --pen-soft:#3a1f22; --ok:#6fcf97; --ok-soft:#1c3327; --note:#f2c26b; --note-soft:#3a2f17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#111827; --sheet:#172033; --ink:#e6ecf7; --muted:#a3b0c7; --line:#2a3650; --grid:#1a2438;
+  --pen:#f0716b; --pen-soft:#3a1f22; --ok:#6fcf97; --ok-soft:#1c3327; --note:#f2c26b; --note-soft:#3a2f17; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px);background-size:100% 28px}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.25;margin:0}
+h1{font-size:clamp(28px,5vw,40px)} h2{font-size:24px} h3{font-size:18px}
+p{margin:0} a{color:var(--pen)}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--pen);font-weight:600}
+header.top{display:flex;flex-direction:column;gap:10px;padding-block:8px}
+header.top .lead{color:var(--muted);max-width:62ch}
+.byline{border-left:3px solid var(--pen);padding:6px 12px;font-size:14px;color:var(--muted);display:flex;flex-direction:column;gap:4px;max-width:70ch}
+.byline b{color:var(--ink)}
+.stamp{align-self:flex-start;border:2px solid var(--pen);color:var(--pen);border-radius:6px;padding:2px 10px;font-weight:700;font-size:13px;transform:rotate(-2deg)}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line);display:flex;gap:6px;flex-wrap:wrap;padding-block:8px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+nav.toc a{font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--sheet)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--pen);color:var(--pen);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.picker{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+label{font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:4px;min-width:0}
+select,input{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--pen);outline-offset:2px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.fact{border-left:3px solid var(--ink);padding:4px 10px;min-width:0}
+.fact b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.chip{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:1px 9px;margin:2px 4px 2px 0;background:var(--ok-soft);color:var(--ok)}
+.chip.no{background:var(--pen-soft);color:var(--pen)}
+.warn{background:var(--note-soft);color:var(--note);border-radius:8px;padding:10px 12px;font-size:14px}
+.prompt{border:1px dashed var(--muted);border-radius:10px;background:var(--paper);display:flex;flex-direction:column}
+.prompt .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.prompt .bar span{font-size:13px;font-weight:600;color:var(--muted)}
+.prompt pre{margin:0;padding:12px;white-space:pre-wrap;word-break:break-word;font-family:var(--f-mono);font-size:13.5px;line-height:1.55;max-height:420px;overflow:auto}
+.prompt pre mark{background:var(--pen-soft);color:var(--pen);border-radius:3px;padding:0 2px}
+button.copy{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--pen);color:var(--pen);background:var(--sheet);border-radius:8px;padding:5px 12px;cursor:pointer}
+button.copy:hover{background:var(--pen-soft)}
+.steps{display:flex;flex-direction:column;gap:14px;counter-reset:s}
+details.step{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:0}
+details.step summary{cursor:pointer;list-style:none;display:flex;gap:12px;align-items:baseline;padding:14px 16px}
+details.step summary::-webkit-details-marker{display:none}
+details.step summary .no{font-family:var(--f-mono);font-weight:500;color:var(--pen);min-width:34px}
+details.step summary .t{font-weight:600}
+details.step summary .d{display:block;font-size:14px;color:var(--muted);font-weight:400}
+details.step[open] summary{border-bottom:1px solid var(--line)}
+details.step .body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.subj{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.subj .sheet h3{color:var(--pen)}
+ul{margin:0;padding-left:20px} li{margin:2px 0}
+.tbl{overflow-x:auto} table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} th{background:var(--grid)}
+.check{display:flex;flex-direction:column;gap:6px}
+.check label{flex-direction:row;align-items:flex-start;gap:8px;font-weight:400;color:var(--ink);font-size:15px}
+.check input{width:auto;margin-top:5px}
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Tiểu học · Lớp 1–5 · Theo Thông tư 27/2020/TT-BGDĐT</span>
+    <h1>Cẩm nang câu lệnh ra đề kiểm tra định kì</h1>
+    <p class="lead">Chọn lớp, môn, đợt kiểm tra. Các câu lệnh bên dưới tự điền đúng thông tin để thầy cô sao chép vào trợ lí AI. Mỗi câu lệnh làm một việc: chốt đầu vào, lập ma trận, viết đặc tả, soạn câu hỏi, làm đáp án, rà soát. Đề do AI soạn luôn là <b>bản nháp</b>; tổ chuyên môn thẩm định trước khi dùng.</p>
+    <div class="byline">
+      <p><b>Biên soạn:</b> Thầy Trần Hữu Hạnh — Trường TH&amp;THCS Đa Phước, xã Vĩnh Hậu, tỉnh An Giang · năm học 2026–2027.</p>
+      <p><b>Căn cứ:</b> Thông tư 27/2020/TT-BGDĐT (đã sửa đổi, bổ sung); Chương trình GDPT 2018 (TT 32/2018/TT-BGDĐT); Công văn 5208/BGDĐT-GDPT về hồ sơ, sổ sách. Cẩm nang hỗ trợ soạn đề, không thay thế văn bản quy định và hướng dẫn của nhà trường.</p>
+    </div>
+    <span class="stamp">BẢN NHÁP — GV DUYỆT TRƯỚC KHI DÙNG</span>
+  </header>
+
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#huongdan">Hướng dẫn sử dụng</a><a href="#chon">1. Chọn lớp – môn</a><a href="#tong">2. Câu lệnh tổng</a><a href="#buoc">3. 12 câu lệnh từng bước</a>
+    <a href="#mon">4. Lưu ý theo môn</a><a href="#tt27">5. Điều cần nhớ TT27</a><a href="#kiem">6. Kiểm trước khi dùng</a>
+  </nav>
+
+  <section id="huongdan">
+    <h2>Hướng dẫn giáo viên sử dụng</h2>
+    <div class="sheet">
+      <h3>Chuẩn bị trước (khoảng 10 phút)</h3>
+      <ul>
+        <li><b>Danh sách bài đã dạy</b> đến thời điểm kiểm tra: chép từ kế hoạch dạy học của trường (tên bài, chủ đề, số trang SGK).</li>
+        <li><b>Hướng dẫn của trường, của tổ</b> (nếu có): tỉ lệ mức, số câu, thời gian làm bài, cách quy đổi điểm Đọc – Viết môn Tiếng Việt.</li>
+        <li>Một trợ lí AI thầy cô quen dùng (ChatGPT, Gemini, Claude, Copilot…), mở trên máy tính hoặc điện thoại.</li>
+        <li>Ma trận hoặc đề kì trước của tổ (nếu có) để AI bám theo.</li>
+      </ul>
+    </div>
+    <div class="sheet">
+      <h3>Bảy bước dùng cẩm nang</h3>
+      <ol style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px">
+        <li><b>Chọn lớp, môn, đợt kiểm tra</b> ở mục 1; điền tên trường, thời gian làm bài, tỉ lệ mức theo hướng dẫn của tổ. Máy chỉ hiện đúng các môn, các đợt có kiểm tra định kì theo TT27; mọi câu lệnh bên dưới tự điền theo lựa chọn này.</li>
+        <li><b>Chọn cách làm:</b>
+          <ul>
+            <li><i>Cách nhanh</i> — dùng <b>câu lệnh tổng F00</b> (mục 2): một lần gửi ra trọn bộ bản nháp. Hợp với đề luyện tập, đề ôn trên lớp.</li>
+            <li><i>Cách chắc</i> — dùng <b>F01 đến F12</b> (mục 3) theo thứ tự, mỗi lần một câu lệnh. Hợp với đề nộp tổ, đề kiểm tra chung khối.</li>
+          </ul></li>
+        <li><b>Bấm «Sao chép»</b>, mở trợ lí AI, tạo <b>cuộc trò chuyện mới</b> rồi dán vào ô nhập.</li>
+        <li><b>Thay các chỗ tô đỏ trong ngoặc vuông […]</b> bằng thông tin thật: bộ sách, danh sách bài đã dạy, đặc điểm lớp (không ghi tên học sinh). Xong mới bấm gửi.</li>
+        <li><b>Đọc kết quả, hỏi lại nếu chưa ưng</b>, ví dụ: «Câu 5 khó quá với lớp 2, viết lại dễ hơn», «Thay tình huống câu 7 bằng chuyện đi chợ ở quê». Với cách chắc, chỉ gửi câu lệnh bước sau khi bước trước đã ổn.</li>
+        <li><b>Tự làm lại đề như học sinh</b> và đối chiếu đáp án (F08, F09). AI có thể giải sai, đếm sai hình, trích sai yêu cầu cần đạt; những chỗ AI đánh dấu ⚠️ phải xem kĩ.</li>
+        <li><b>Chuyển sang Word</b> (F12): sao chép kết quả, dán vào Word, chỉnh phông chữ, chèn tranh; nộp tổ chuyên môn góp ý, thống nhất rồi mới in.</li>
+      </ol>
+    </div>
+    <div class="sheet">
+      <h3>Mẹo để AI làm đúng hơn</h3>
+      <ul>
+        <li>Mỗi đề dùng <b>một cuộc trò chuyện riêng</b>; không ra hai môn trong cùng cuộc trò chuyện.</li>
+        <li>Cuộc trò chuyện dài, AI hay «quên» ma trận: dán lại ma trận, đặc tả đã thống nhất rồi mới gửi câu lệnh tiếp.</li>
+        <li>Muốn đề sát lớp mình: dán thêm 1–2 câu trong đề cũ của tổ và nói «ra câu tương tự, đổi số liệu».</li>
+        <li>Đề có hình (đếm hình, đo góc, tranh): AI chỉ mô tả hình trong ngoặc vuông; thầy cô tự vẽ hoặc chụp tranh rồi chèn vào Word, sau đó <b>đếm lại đáp án trên hình thật</b>.</li>
+        <li>Văn bản đọc hiểu do AI viết: đọc kĩ nội dung, từ ngữ, độ dài cho phù hợp học sinh trước khi dùng.</li>
+        <li>Trên điện thoại: nếu nút «Sao chép» không chạy, trang sẽ chọn sẵn câu lệnh; nhấn giữ rồi chọn «Sao chép».</li>
+      </ul>
+    </div>
+    <div class="warn"><b>Không được:</b> dán họ tên, ngày sinh, điểm số, hoàn cảnh của học sinh vào AI; dùng đề AI soạn khi tổ chưa duyệt; chép nguyên văn bài đọc, bài tập trong SGK, sách bài tập làm đề kiểm tra.</div>
+  </section>
+
+  <section id="chon">
+    <h2>1. Chọn lớp, môn, đợt kiểm tra</h2>
+    <div class="sheet">
+      <div class="picker">
+        <label for="lop">Lớp<select id="lop"></select></label>
+        <label for="mon">Môn có kiểm tra định kì<select id="mon"></select></label>
+        <label for="dot">Đợt kiểm tra<select id="dot"></select></label>
+        <label for="tg">Thời gian làm bài (phút)<input id="tg" type="number" min="20" max="90" value="40"></label>
+        <label for="truong">Trường (ghi trên đề)<input id="truong" type="text" placeholder="VD: Trường TH&amp;THCS …"></label>
+        <label for="tile">Tỉ lệ mức M1/M2/M3 (%)<input id="tile" type="text" value="40/40/20"></label>
+      </div>
+      <div class="facts" id="facts"></div>
+      <div class="warn" id="canhbao" hidden></div>
+    </div>
+  </section>
+
+  <section id="tong">
+    <h2>2. Một câu lệnh tổng — ra trọn bộ hồ sơ đề</h2>
+    <p>Dùng khi cần một bản nháp nhanh đủ cả ma trận, đặc tả, đề, đáp án và tự rà soát. Thay các chỗ <mark style="background:var(--pen-soft);color:var(--pen)">[…]</mark> bằng nội dung thật của lớp mình trước khi gửi.</p>
+    <div class="prompt"><div class="bar"><span>F00 · Câu lệnh tổng</span><button class="copy" data-k="F00">Sao chép</button></div><pre id="p-F00"></pre></div>
+  </section>
+
+  <section id="buoc">
+    <h2>3. Mười hai câu lệnh làm từng bước</h2>
+    <p>Làm theo thứ tự khi đề cần chắc chắn (đề nộp tổ, đề kiểm tra chung khối). Mỗi bước dán kết quả bước trước vào cuộc trò chuyện rồi gửi câu lệnh tiếp theo.</p>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <section id="mon">
+    <h2>4. Lưu ý theo từng môn</h2>
+    <div class="subj" id="subj"></div>
+  </section>
+
+  <section id="tt27">
+    <h2>5. Điều cần nhớ khi ra đề theo TT27</h2>
+    <div class="sheet">
+      <div class="tbl"><table>
+        <thead><tr><th>Lớp</th><th>Môn có bài kiểm tra định kì</th><th>Số đợt</th></tr></thead>
+        <tbody>
+          <tr><td>1, 2</td><td>Tiếng Việt, Toán</td><td>Cuối học kì I, cuối năm học</td></tr>
+          <tr><td>3</td><td>Tiếng Việt, Toán, Ngoại ngữ 1, Tin học và Công nghệ</td><td>Cuối học kì I, cuối năm học</td></tr>
+          <tr><td>4, 5</td><td>Như lớp 3 và thêm Khoa học, Lịch sử và Địa lí</td><td>Cuối học kì I, cuối năm học; riêng <b>Tiếng Việt, Toán</b> có thêm giữa học kì I và giữa học kì II</td></tr>
+        </tbody></table></div>
+      <ul>
+        <li><b>Ba mức của đề:</b> Mức 1 — nhận biết, nhắc lại, tái hiện kiến thức, kĩ năng đã học; Mức 2 — kết nối, sắp xếp được kiến thức, kĩ năng đã học để giải quyết vấn đề quen thuộc, tương tự; Mức 3 — vận dụng để giải quyết vấn đề mới hoặc đưa ra phản hồi hợp lí trong học tập, cuộc sống.</li>
+        <li><b>Chấm:</b> thang điểm 10, <b>không cho điểm 0 và không cho điểm thập phân</b>; GV sửa lỗi, nhận xét, trả bài cho học sinh.</li>
+        <li><b>Tỉ lệ M1/M2/M3 không do thông tư quy định.</b> Số mặc định trong cẩm nang chỉ là gợi ý; theo hướng dẫn của trường, của tổ.</li>
+        <li><b>Không dùng điểm để so sánh học sinh.</b> Kết quả bài kiểm tra bất thường so với đánh giá thường xuyên thì GV đề xuất cho học sinh làm bài kiểm tra khác.</li>
+        <li><b>Xếp loại hoàn thành xuất sắc</b> cần bài kiểm tra định kì cuối năm của các môn đạt từ 9 điểm trở lên.</li>
+        <li>Ma trận, đặc tả, đề là sản phẩm của <b>tổ chuyên môn</b>; AI chỉ soạn nháp.</li>
+        <li>Thông tư 89/2026/TT-BGDĐT (ngày 16/10/2026) sửa đổi, bổ sung TT27 về Học bạ số, Bảng tổng hợp kết quả, đánh giá HS khuyết tật; thầy cô đối chiếu bản gốc khi áp dụng từ ngày có hiệu lực.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="kiem">
+    <h2>6. Mười điểm kiểm trước khi dùng đề</h2>
+    <div class="sheet check" id="check"></div>
+    <div class="warn"><b>An toàn dữ liệu:</b> không dán họ tên, ngày sinh, số điện thoại, hoàn cảnh của học sinh vào AI. Khi cần nói về lớp, chỉ mô tả chung (VD: «lớp 32 em, nhiều em đọc chậm») hoặc dùng mã HS01, HS02.</div>
+  </section>
+
+  <footer>
+    <span>Cẩm nang câu lệnh ra đề kiểm tra định kì Tiểu học · Thầy Trần Hữu Hạnh · 2026–2027.</span>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite">Đã sao chép</div>
+
+<script>
+const MON = {
+  "Tiếng Việt":{lop:[1,2,3,4,5]}, "Toán":{lop:[1,2,3,4,5]},
+  "Tiếng Anh (Ngoại ngữ 1)":{lop:[3,4,5]}, "Tin học":{lop:[3,4,5]}, "Công nghệ":{lop:[3,4,5]},
+  "Khoa học":{lop:[4,5]}, "Lịch sử và Địa lí":{lop:[4,5]}
+};
+const DOC = {1:"HK I khoảng 35–40 tiếng; cuối năm khoảng 60 tiếng",2:"khoảng 60–70 tiếng/phút",3:"khoảng 70–80 tiếng/phút",4:"khoảng 80–90 tiếng/phút",5:"khoảng 90–100 tiếng/phút"};
+const TILE = {1:"50/30/20",2:"50/30/20",3:"40/40/20",4:"40/40/20",5:"40/40/20"};
+const $ = id => document.getElementById(id);
+function dots(lop, mon){
+  const d=["Cuối học kì I","Cuối năm học"];
+  if(lop>=4 && (mon==="Tiếng Việt"||mon==="Toán")) return ["Giữa học kì I","Cuối học kì I","Giữa học kì II","Cuối năm học"];
+  return d;
+}
+function save(){ try{ localStorage.setItem("cnrd",JSON.stringify({lop:$("lop").value,mon:$("mon").value,dot:$("dot").value,tg:$("tg").value,truong:$("truong").value,tile:$("tile").value})) }catch(e){} }
+function load(){ try{ return JSON.parse(localStorage.getItem("cnrd")||"{}") }catch(e){ return {} } }
+
+function ctx(){
+  const lop=+$("lop").value, mon=$("mon").value, dot=$("dot").value;
+  return {lop, mon, dot, tg:$("tg").value||"40", truong:$("truong").value||"[tên trường]", tile:$("tile").value||TILE[lop], doc:DOC[lop]};
+}
+function monNote(c){
+  const m=c.mon;
+  if(m==="Tiếng Việt") return `Cấu trúc: phần Đọc (đọc thành tiếng kết hợp trả lời câu hỏi; đọc hiểu một văn bản mới cùng thể loại, độ dài đúng tầm lớp ${c.lop}; câu hỏi về từ và câu đã học) và phần Viết (${c.lop<=2?"chính tả nghe – viết đoạn ngắn, bài tập chính tả âm vần; câu/đoạn ngắn theo tranh hoặc gợi ý":"chính tả nếu trường yêu cầu; viết đoạn văn/bài văn theo kiểu bài đã học trong kì"}). Tốc độ đọc tham khảo: ${c.doc}. Cách quy đổi điểm Đọc – Viết theo hướng dẫn của trường.`;
+  if(m==="Toán") return `Mạch: số và phép tính; hình học và đo lường${c.lop>=2?"; một số yếu tố thống kê và xác suất":""}. Có bài toán gắn tình huống thực tế quen thuộc ở địa phương. Bài giải trình bày đủ câu lời giải, phép tính, đáp số.`;
+  if(m.startsWith("Tiếng Anh")) return `Bám các Unit đã học trong sách giáo khoa đang dùng. Gồm nghe, đọc, viết (nói kiểm tra riêng nếu trường tổ chức). Tranh, từ vựng, mẫu câu đúng chủ đề đã học; lệnh tiếng Anh ngắn kèm ví dụ mẫu.`;
+  if(m==="Tin học") return `Gồm phần lí thuyết (câu hỏi ngắn) và phần thực hành trên máy theo bài đã học; ghi rõ máy cần chuẩn bị, tiêu chí chấm thực hành. Có phương án khi thiếu máy. Môn Tin học và Công nghệ: làm một bài hay hai bài theo hướng dẫn của trường.`;
+  if(m==="Công nghệ") return `Câu hỏi kết hợp quan sát tranh, nhận biết dụng cụ, vật liệu, an toàn; nhiệm vụ thực hành ngắn, không đòi sản phẩm lắp ghép dài trong giờ kiểm tra.`;
+  if(m==="Khoa học") return `Bám các chủ đề đã học trong kì; có câu hỏi về thí nghiệm, quan sát, giải thích hiện tượng gần gũi; liên hệ bảo vệ sức khoẻ, môi trường.`;
+  return `Có câu khai thác lược đồ, bản đồ, tranh ảnh, tư liệu trong SGK; mốc năm, nhân vật, địa danh chỉ lấy trong SGK; có câu liên hệ địa phương (tỉnh, xã nơi trường đóng).`;
+}
+
+const STEPS = [
+  ["F01","Chốt đầu vào","Đưa đủ thông tin để AI không phải đoán",
+c=>`Bạn là chuyên gia khảo thí tiểu học Việt Nam, am hiểu Chương trình GDPT 2018 và Thông tư 27/2020/TT-BGDĐT (đã sửa đổi, bổ sung).
+Tôi chuẩn bị bài kiểm tra định kì sau:
+- Trường: ${c.truong}
+- Môn: ${c.mon} — Lớp ${c.lop} — Đợt: ${c.dot}
+- Thời gian làm bài: ${c.tg} phút
+- Bộ sách đang dùng: [Kết nối tri thức với cuộc sống / tên bộ sách]
+- Các bài, chủ đề đã dạy đến thời điểm kiểm tra: [dán danh sách bài theo kế hoạch dạy học của trường]
+- Tỉ lệ mức M1/M2/M3 mong muốn: ${c.tile} (gợi ý của tổ, không phải quy định)
+- Đặc điểm lớp (không ghi tên học sinh): [VD: 32 em, nhiều em đọc chậm, vùng nông thôn]
+Việc của bạn bây giờ: CHƯA ra đề. Hãy kiểm tra thông tin trên còn thiếu hoặc mâu thuẫn gì (đợt kiểm tra có đúng với môn và lớp theo TT27 không, nội dung có vượt chương trình không), rồi liệt kê tối đa 5 câu hỏi cần tôi trả lời.`],
+  ["F02","Lập bản đồ yêu cầu cần đạt","Chỉ kiểm tra những gì đã dạy",
+c=>`Dựa trên danh sách bài đã dạy tôi gửi, hãy lập bảng "bản đồ yêu cầu cần đạt" môn ${c.mon} lớp ${c.lop}, đợt ${c.dot}:
+| Mạch nội dung | Bài/chủ đề | Yêu cầu cần đạt (diễn đạt theo CT GDPT 2018) | Có thể kiểm tra bằng giấy bút trong ${c.tg} phút? |
+Yêu cầu:
+- Chỉ dùng yêu cầu cần đạt của lớp ${c.lop}; không đưa kiến thức lớp trên.
+- Đánh dấu ⚠️ những yêu cầu bạn không chắc trích đúng chương trình để tôi đối chiếu.
+- Gộp các yêu cầu trùng nhau; đề xuất yêu cầu nào nên ưu tiên đưa vào đề.`],
+  ["F03","Phân bổ và lập ma trận","Mạch × mức × số câu × điểm",
+c=>`Từ bản đồ yêu cầu cần đạt đã thống nhất, lập ma trận đề kiểm tra ${c.mon} lớp ${c.lop}, ${c.dot}:
+- Hàng: mạch nội dung/chủ đề. Cột: Mức 1, Mức 2, Mức 3 (theo TT27); mỗi ô ghi số câu, hình thức (trắc nghiệm/tự luận/thực hành), số điểm.
+- Tổng điểm đúng 10; mỗi câu và mỗi ý chấm bằng điểm nguyên hoặc 0,5 sao cho TỔNG BÀI làm tròn được thành số nguyên (TT27: không cho điểm thập phân).
+- Tỉ lệ điểm theo mức gần ${c.tile}; nếu lệch, giải thích vì sao.
+- Số câu vừa sức làm trong ${c.tg} phút với học sinh lớp ${c.lop}; ghi ước tính thời gian từng phần.
+Trình bày thành bảng, dưới bảng có dòng tổng số câu, tổng điểm theo mức.`],
+  ["F04","Viết bản đặc tả","Mỗi câu một dòng, đủ để người khác ra câu",
+c=>`Viết bản đặc tả cho ma trận vừa lập. Mỗi câu một dòng:
+| Câu | Mạch | Yêu cầu cần đạt | Mức (M1/M2/M3) | Hình thức | Điểm | Mô tả câu hỏi cần ra (ngữ liệu, số liệu, tình huống) |
+Yêu cầu: mô tả đủ cụ thể để một giáo viên khác ra được câu tương đương; không lặp một yêu cầu cần đạt quá 2 câu; đánh số câu khớp ma trận.`],
+  ["F05","Soạn câu hỏi trắc nghiệm","Rõ một đáp án đúng, nhiễu hợp lí",
+c=>`Soạn các câu trắc nghiệm theo đúng bản đặc tả (môn ${c.mon}, lớp ${c.lop}). Với mỗi câu:
+- Lệnh ngắn, từ ngữ quen thuộc với học sinh lớp ${c.lop}; ${c.lop<=2?"câu ngắn, có tranh gợi ý nếu cần (mô tả tranh trong ngoặc vuông)":"không dùng câu phủ định kép"}.
+- 4 phương án A, B, C, D (lớp 1–2 có thể 3 phương án); chỉ một phương án đúng; phương án nhiễu xuất phát từ lỗi học sinh hay mắc, không đánh đố.
+- Dạng phong phú khi phù hợp: nối, điền, đúng/sai, sắp xếp.
+- Ghi kèm: [Đáp án] [Mức] [Lỗi học sinh mà mỗi phương án nhiễu nhắm tới].
+Không lấy nguyên văn câu trong sách giáo khoa, sách bài tập làm đề.`],
+  ["F06","Soạn câu tự luận, thực hành","Kèm hướng dẫn chấm từng ý",
+c=>`Soạn các câu tự luận/thực hành theo bản đặc tả (môn ${c.mon}, lớp ${c.lop}, ${c.dot}). Với mỗi câu:
+- Tình huống gần gũi với học sinh nông thôn/địa phương; số liệu, độ dài văn bản vừa sức lớp ${c.lop}.
+- Hướng dẫn chấm chia ý, mỗi ý có điểm; nêu đáp án chấp nhận được (cách giải khác, cách diễn đạt khác).
+- Với câu mở (nêu ý kiến, viết đoạn): tiêu chí chấm theo mức đạt, không yêu cầu đúng từng chữ.
+Lưu ý môn: ${monNote(c)}`],
+  ["F07","Riêng Tiếng Việt: phiếu đọc","Đọc thành tiếng và đọc hiểu",
+c=>`(Dùng cho môn Tiếng Việt lớp ${c.lop}.) Soạn bộ kiểm tra đọc ${c.dot}:
+1. Đọc thành tiếng: 6–8 phiếu bốc thăm, mỗi phiếu là một đoạn trong các bài đọc đã học (ghi tên bài, trang SGK, đoạn từ… đến…), độ dài tương đương nhau; kèm 1 câu hỏi về nội dung đoạn. Tốc độ tham khảo: ${c.doc}.
+2. Bảng chấm đọc thành tiếng: đọc đúng tiếng, từ; ngắt nghỉ đúng; tốc độ; trả lời câu hỏi — mỗi tiêu chí có điểm.
+3. Đọc hiểu: một văn bản MỚI do bạn tự viết (ghi rõ "văn bản do AI soạn, GV duyệt"), cùng thể loại đã học, độ dài phù hợp lớp ${c.lop}; 6–8 câu hỏi gồm cả M1, M2, M3 và 1–2 câu về từ, câu.
+Không chép bài đọc trong sách giáo khoa làm văn bản đọc hiểu.`],
+  ["F08","Giải độc lập và làm đáp án","Tự làm lại đề như học sinh",
+c=>`Hãy đóng vai một học sinh lớp ${c.lop} giỏi, tự làm toàn bộ đề vừa soạn mà KHÔNG nhìn đáp án đã ghi. Sau đó:
+- So sánh kết quả tự làm với đáp án đã ghi; liệt kê mọi chỗ lệch, câu có nhiều hơn một đáp án đúng, câu không có đáp án đúng.
+- Viết lại đáp án và hướng dẫn chấm hoàn chỉnh: thang 10, tổng điểm khớp ma trận; nêu cách làm tròn điểm toàn bài thành số nguyên theo hướng dẫn của trường; không có điểm 0.
+- Ước tính thời gian một học sinh trung bình làm xong đề; nếu vượt ${c.tg} phút, đề xuất bớt câu nào.`],
+  ["F09","Đối chiếu toàn bộ hồ sơ","Ma trận – đặc tả – đề – đáp án khớp nhau",
+c=>`Đối chiếu từng dòng giữa ma trận, bản đặc tả, đề và đáp án (môn ${c.mon} lớp ${c.lop}). Lập bảng:
+| Câu | Đúng mạch? | Đúng mức? | Đúng hình thức? | Điểm khớp? | Ghi chú cần sửa |
+Cuối bảng: tổng điểm theo mức thực tế so với dự kiến ${c.tile}; danh sách việc cần sửa xếp theo mức độ nghiêm trọng.`],
+  ["F10","Rà ngôn ngữ, đúng tầm, công bằng","Học sinh nào cũng đọc hiểu được lệnh",
+c=>`Rà soát đề với con mắt của giáo viên lớp ${c.lop}:
+- Lệnh có từ khó, câu dài, cách hỏi lắt léo không? Đề xuất cách viết lại.
+- Có kiến thức chưa học, kiến thức lớp trên không?
+- Tình huống có xa lạ với học sinh vùng nông thôn, có thiên lệch giới, vùng miền, hoàn cảnh gia đình không? Có nội dung gây áp lực, sợ hãi không?
+- Trình bày: cỡ chữ, khoảng trống để học sinh làm bài, tranh/hình cần in rõ.
+Trả lời theo từng câu, chỉ nêu chỗ cần sửa và bản sửa.`],
+  ["F11","Tạo đề song song (đề B)","Cùng ma trận, khác ngữ liệu",
+c=>`Từ đề A đã duyệt, soạn đề B tương đương cho môn ${c.mon} lớp ${c.lop}:
+- Giữ nguyên ma trận, bản đặc tả, số câu, mức, điểm.
+- Thay số liệu, ngữ liệu, tình huống; độ khó tương đương từng câu (giải thích ngắn vì sao tương đương).
+- Kèm đáp án, hướng dẫn chấm đề B.
+- Không đảo thứ tự làm thay đổi độ khó của phần đầu đề.`],
+  ["F12","Định dạng để in và nộp tổ","Một tệp Word chỉnh sửa được",
+c=>`Trình bày hồ sơ cuối cùng theo thứ tự để tôi dán vào Word:
+1. Đầu đề: ${c.truong} — BÀI KIỂM TRA ${c.dot.toUpperCase()} — Môn ${c.mon} — Lớp ${c.lop} — Thời gian ${c.tg} phút; dòng Họ và tên, Lớp, ô Điểm, ô Nhận xét của giáo viên.
+2. Đề bài (đánh số câu liên tục, chừa dòng kẻ để học sinh làm).
+3. Đáp án và hướng dẫn chấm.
+4. Ma trận và bản đặc tả.
+Dùng bảng đơn giản, không dùng kí hiệu đặc biệt khó in.`]
+];
+
+const CHECK = [
+  "Đợt kiểm tra đúng với môn và lớp theo TT27 (lớp 4–5 chỉ Tiếng Việt, Toán có bài giữa kì).",
+  "Không có kiến thức chưa học đến thời điểm kiểm tra, không có kiến thức lớp trên.",
+  "Mỗi câu gắn đúng một mức M1, M2, M3; tỉ lệ theo hướng dẫn của trường.",
+  "Tổng điểm 10; cách làm tròn cho ra điểm nguyên, không có điểm 0.",
+  "Mỗi câu trắc nghiệm có đúng một đáp án; đã tự giải lại toàn bộ đề.",
+  "Lệnh ngắn, rõ, học sinh lớp mình tự đọc hiểu được.",
+  "Ngữ liệu đọc hiểu là văn bản mới, không chép nguyên bài trong sách.",
+  "Số câu vừa thời gian làm bài; trình bày đủ chỗ để học sinh làm.",
+  "Không có tên, thông tin riêng của học sinh trong bất kì câu lệnh nào đã gửi AI.",
+  "Tổ chuyên môn đã xem, góp ý và thống nhất trước khi in."
+];
+
+function hl(t){ return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\[[^\]]+\]/g,m=>`<mark>${m}</mark>`); }
+const TXT = {};
+function render(){
+  const c=ctx();
+  const ok=Object.keys(MON).filter(m=>MON[m].lop.includes(c.lop));
+  $("facts").innerHTML = `
+    <div class="fact"><b>Môn có KTĐK lớp ${c.lop}</b>${ok.map(m=>`<span class="chip">${m}</span>`).join("")}</div>
+    <div class="fact"><b>Các đợt của môn này</b>${dots(c.lop,c.mon).join(" · ")}</div>
+    <div class="fact"><b>Tỉ lệ mức gợi ý</b>${TILE[c.lop]} (không phải quy định)</div>
+    ${c.mon==="Tiếng Việt"?`<div class="fact"><b>Tốc độ đọc tham khảo</b>${c.doc}</div>`:""}`;
+  const w=$("canhbao");
+  if(c.mon==="Tin học"||c.mon==="Công nghệ"){ w.hidden=false; w.textContent="TT27 ghi chung một môn «Tin học và Công nghệ». Ra một bài hay hai bài riêng theo hướng dẫn của trường."; }
+  else w.hidden=true;
+  const tong = `Bạn là chuyên gia khảo thí tiểu học Việt Nam, am hiểu Chương trình GDPT 2018 và Thông tư 27/2020/TT-BGDĐT (đã sửa đổi, bổ sung).
+Hãy soạn BẢN NHÁP hồ sơ bài kiểm tra định kì:
+- Trường: ${c.truong}
+- Môn: ${c.mon} — Lớp ${c.lop} — Đợt: ${c.dot} — Thời gian: ${c.tg} phút
+- Bộ sách: [Kết nối tri thức với cuộc sống / tên bộ sách]
+- Nội dung đã dạy đến thời điểm kiểm tra: [dán danh sách bài/chủ đề theo kế hoạch dạy học]
+- Tỉ lệ mức M1/M2/M3: ${c.tile} (gợi ý của tổ)
+- Đặc điểm lớp (không ghi tên học sinh): [VD: 32 em, vùng nông thôn]
+
+Làm lần lượt, trình bày rõ từng phần:
+1. Bản đồ yêu cầu cần đạt của lớp ${c.lop} tương ứng với nội dung đã dạy (đánh dấu ⚠️ chỗ không chắc).
+2. Ma trận: mạch nội dung × Mức 1/Mức 2/Mức 3 (theo TT27) × số câu × hình thức × điểm; tổng 10 điểm.
+3. Bản đặc tả: mỗi câu một dòng (yêu cầu cần đạt, mức, hình thức, điểm, mô tả câu).
+4. Đề bài: lệnh ngắn, đúng tầm lớp ${c.lop}, tình huống gần gũi; trắc nghiệm có một đáp án đúng; ngữ liệu mới, không chép sách giáo khoa.
+5. Đáp án và hướng dẫn chấm: thang 10, không cho điểm 0, tổng bài làm tròn thành số nguyên; chấp nhận cách làm khác hợp lí.
+6. Tự kiểm: tự làm lại đề như một học sinh, đối chiếu ma trận – đặc tả – đề – đáp án, liệt kê chỗ cần sửa và sửa luôn.
+Lưu ý môn: ${monNote(c)}
+Cuối hồ sơ ghi: "Bản nháp do AI hỗ trợ — tổ chuyên môn thẩm định trước khi sử dụng."`;
+  TXT.F00=tong; $("p-F00").innerHTML=hl(tong);
+  STEPS.forEach(([k,,,f])=>{ const t=f(c); TXT[k]=t; const el=$("p-"+k); if(el) el.innerHTML=hl(t); });
+  save();
+}
+function fillMon(keep){
+  const lop=+$("lop").value; const ok=Object.keys(MON).filter(m=>MON[m].lop.includes(lop));
+  $("mon").innerHTML=ok.map(m=>`<option>${m}</option>`).join("");
+  if(keep && ok.includes(keep)) $("mon").value=keep;
+}
+function fillDot(keep){
+  const d=dots(+$("lop").value,$("mon").value);
+  $("dot").innerHTML=d.map(x=>`<option>${x}</option>`).join("");
+  if(keep && d.includes(keep)) $("dot").value=keep;
+}
+function init(){
+  const s=load();
+  $("lop").innerHTML=[1,2,3,4,5].map(l=>`<option value="${l}">Lớp ${l}</option>`).join("");
+  $("lop").value=s.lop||"4";
+  fillMon(s.mon); fillDot(s.dot);
+  if(s.tg) $("tg").value=s.tg; if(s.truong) $("truong").value=s.truong;
+  $("tile").value=s.tile||TILE[+$("lop").value];
+  $("steps").innerHTML=STEPS.map(([k,t,d],i)=>`<details class="step"${i===0?" open":""}><summary><span class="no">${k}</span><span><span class="t">${t}</span><span class="d">${d}</span></span></summary>
+    <div class="body"><div class="prompt"><div class="bar"><span>${k} · Câu lệnh sao chép</span><button class="copy" data-k="${k}">Sao chép</button></div><pre id="p-${k}"></pre></div></div></details>`).join("");
+  const SUBJ=[["Tiếng Việt",1],["Toán",1],["Tiếng Anh (Ngoại ngữ 1)",3],["Tin học",3],["Công nghệ",3],["Khoa học",4],["Lịch sử và Địa lí",4]];
+  $("subj").innerHTML=SUBJ.map(([m,l])=>`<div class="sheet"><h3>${m}</h3><p style="font-size:13px;color:var(--muted)">Có KTĐK từ lớp ${l}</p><p>${monNote({mon:m,lop:l===1?3:l,doc:DOC[l===1?3:l]})}</p></div>`).join("");
+  $("check").innerHTML=CHECK.map((t,i)=>`<label for="ck${i}"><input type="checkbox" id="ck${i}"> ${t}</label>`).join("");
+  $("lop").addEventListener("change",()=>{ $("tile").value=TILE[+$("lop").value]; fillMon($("mon").value); fillDot($("dot").value); render(); });
+  $("mon").addEventListener("change",()=>{ fillDot($("dot").value); render(); });
+  ["dot","tg","truong","tile"].forEach(id=>$(id).addEventListener("input",render));
+  document.addEventListener("click",e=>{
+    const b=e.target.closest("button.copy"); if(!b) return;
+    const t=TXT[b.dataset.k]||"";
+    const done=()=>{ const o=$("toast"); o.textContent="Đã sao chép "+b.dataset.k; o.classList.add("on"); setTimeout(()=>o.classList.remove("on"),1600); };
+    const sel=()=>{ const r=document.createRange(); r.selectNodeContents($("p-"+b.dataset.k)); const s=getSelection(); s.removeAllRanges(); s.addRange(r); const o=$("toast"); o.textContent="Đã chọn sẵn — nhấn Ctrl+C để sao chép"; o.classList.add("on"); setTimeout(()=>o.classList.remove("on"),2200); };
+    try{ navigator.clipboard.writeText(t).then(done,sel); }catch(err){ sel(); }
+  });
+  render();
+}
+init();
+</script>
