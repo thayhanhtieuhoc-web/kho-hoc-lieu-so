@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SỔ TAY VÀNG AI — Lưu trọn dữ liệu, tìm lại một chạm</title>
+<!--
+  SỔ TAY VÀNG AI · © 2026 Trần Hữu Hạnh — tác giả, giữ bản quyền. Trường TH&THCS Đa Phước, xã Vĩnh Hậu, tỉnh An Giang.
+  Tác giả lên ý tưởng, thiết kế chức năng, đưa mẫu của trường, chạy thử và duyệt; mã viết với hỗ trợ của công cụ AI (Google AI Studio – Gemini, Claude).
+  Một file, chạy không cần mạng, không thư viện ngoài, không gửi dữ liệu đi. Dữ liệu lưu trong trình duyệt máy này (localStorage).
+  Chỉ dùng mã học sinh (HS01…). Chế độ chụp: #<màn>&chup=1 (VD #kho&chup=1, #tim&q=de kiem tra&chup=1, #them&ten=...&chup=1,
+  #bai&tuan=7&chup=1, #khbd&tiet=44&chup=1, #khbd&tab=soat&mau=1&chup=1).
+  v3 (19/10/2026): thêm Tiếng Việt 1 (420 tiết), Đạo đức 1 (35), TN&XH 1 (70), HĐTN 1 (105) theo Phụ lục KHDH lớp 1 của trường; ghi chú tích hợp cho Toán 1 (tên tiết Toán trùng PPCT nên không lặp).
+  v2 (19/10/2026): PPCT Toán 1 của trường (35 tuần, 105 tiết) · KHBD theo mẫu trường: lập khung Word + máy soát + đọc .docx trên máy · phụ lục lồng ghép AI lớp 1.
+  Soạn bằng Triway giáo viên (Claude) theo ý tưởng và bản Google AI Studio của tác giả.
+-->
+<style>
+:root{
+  --nen1:#EEF2FF; --nen2:#FFF7E6; --mat:#FFFFFF; --mat-kinh:rgba(255,255,255,.78); --vien:rgba(99,102,241,.14);
+  --chu:#1E1B4B; --chu-phu:#5B5F86; --chinh:#4F46E5; --chinh2:#7C3AED; --vang:#F59E0B; --vang-dam:#B45309;
+  --dung:#059669; --sai:#DC2626; --canh:#D97706; --bong:0 10px 30px rgba(49,46,129,.10);
+  --bo:18px; --phong:"Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--phong);color:var(--chu);font-size:16px;
+  background:radial-gradient(900px 500px at 8% -10%,#E0E7FF 0,transparent 60%),radial-gradient(800px 520px at 100% 0,#FEF3C7 0,transparent 55%),linear-gradient(160deg,var(--nen1),var(--nen2));
+  background-attachment:fixed}
+.chup *{animation:none!important;transition:none!important}
+button{font-family:inherit;cursor:pointer}
+.app{display:grid;grid-template-columns:262px 1fr;min-height:100vh}
+/* ---- thanh bên ---- */
+.ben{background:linear-gradient(180deg,#1E1B4B,#312E81);color:#fff;padding:16px 12px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column;gap:6px}
+.logo{display:flex;gap:10px;align-items:center;padding:4px 6px 14px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:8px}
+.logo h1{margin:0;font-size:19px;letter-spacing:.3px;background:linear-gradient(90deg,#FDE68A,#F59E0B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo small{display:block;color:#C7D2FE;font-size:12px}
+.nhom{font-size:11px;letter-spacing:1.2px;color:#A5B4FC;margin:10px 8px 2px;text-transform:uppercase}
+.muc{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:#E0E7FF;background:none;border:0;font-size:15px;text-align:left;width:100%}
+.muc:hover{background:rgba(255,255,255,.08)}
+.muc.dang{background:linear-gradient(90deg,#6366F1,#8B5CF6);color:#fff;box-shadow:0 6px 16px rgba(99,102,241,.45)}
+.muc .so{margin-left:auto;background:rgba(255,255,255,.16);border-radius:99px;padding:1px 8px;font-size:12px}
+.ben .chan{margin-top:auto;font-size:12px;color:#C7D2FE;padding:10px 6px;border-top:1px solid rgba(255,255,255,.12)}
+/* ---- thân ---- */
+.than{padding:18px 26px 40px;min-width:0}
+.tren{display:flex;gap:12px;align-items:center;margin-bottom:18px;position:sticky;top:0;z-index:5;padding:8px 0;backdrop-filter:blur(8px)}
+.o-tim{flex:1;display:flex;align-items:center;gap:10px;background:var(--mat);border:2px solid var(--vien);border-radius:16px;padding:0 14px;box-shadow:var(--bong);height:52px}
+.o-tim:focus-within{border-color:var(--chinh)}
+.o-tim input{border:0;outline:0;flex:1;font-size:17px;font-family:inherit;background:none;color:var(--chu)}
+.nut{border:0;border-radius:14px;padding:12px 18px;font-size:15px;font-weight:600;min-height:46px;color:#fff;background:linear-gradient(135deg,var(--chinh),var(--chinh2));box-shadow:0 6px 16px rgba(79,70,229,.3);transition:transform .15s}
+.nut:hover{transform:translateY(-2px)} .nut:active{transform:translateY(1px)}
+.nut.vang{background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 6px 16px rgba(234,88,12,.3)}
+.nut.xanh{background:linear-gradient(135deg,#10B981,#059669)}
+.nut.phu{background:#fff;color:var(--chinh);border:2px solid var(--vien);box-shadow:none}
+.nut.nho{padding:7px 12px;min-height:36px;font-size:14px;border-radius:10px}
+.man{display:none;animation:hien .3s ease} .man.dang{display:block}
+@keyframes hien{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2.tieu{font-size:26px;margin:4px 0 4px} p.phu{color:var(--chu-phu);margin:0 0 16px}
+.the{background:var(--mat-kinh);border:1px solid var(--vien);border-radius:var(--bo);box-shadow:var(--bong);padding:18px;backdrop-filter:blur(6px)}
+.luoi{display:grid;gap:16px} .l4{grid-template-columns:repeat(4,1fr)} .l3{grid-template-columns:repeat(3,1fr)} .l2{grid-template-columns:1.4fr 1fr}
+.kpi .so{font-size:38px;font-weight:800;line-height:1.1} .kpi .ten{color:var(--chu-phu);font-size:14px}
+.kpi .bieu{float:right;font-size:26px;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:#EEF2FF}
+.chao{background:linear-gradient(120deg,#4338CA,#6D28D9 60%,#7C3AED);color:#fff;border-radius:24px;padding:24px 26px;display:flex;gap:22px;align-items:center;box-shadow:0 18px 40px rgba(67,56,202,.35);position:relative;overflow:hidden}
+.chao h2{margin:6px 0;font-size:28px} .chao p{margin:0;color:#E0E7FF}
+.huy{display:inline-block;background:#FBBF24;color:#78350F;border-radius:99px;padding:3px 12px;font-weight:700;font-size:13px}
+.canh-bao{display:flex;gap:12px;align-items:center;background:#FFFBEB;border:1px solid #FCD34D;border-radius:16px;padding:12px 16px;margin-bottom:16px;color:#92400E}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:5px 12px;font-size:13px;font-weight:600;background:#EEF2FF;color:var(--chinh);border:1px solid transparent}
+button.chip{border:1px solid var(--vien)} button.chip.dang{background:var(--chinh);color:#fff}
+.dong{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;background:#fff;border:1px solid var(--vien);margin-bottom:10px;transition:transform .15s}
+.dong:hover{transform:translateX(3px)} .dong .bieu{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex:none}
+.dong .giua{flex:1;min-width:0} .dong b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .dong small{color:var(--chu-phu)}
+mark{background:#FDE68A;color:inherit;border-radius:4px;padding:0 2px}
+.thanh{height:10px;border-radius:99px;background:#E0E7FF;overflow:hidden} .thanh i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#6366F1,#A855F7);transition:width .6s}
+.ke-sach svg{width:100%;height:auto;display:block}
+.ngan-the{cursor:pointer;border-radius:16px;padding:14px;color:#fff;position:relative;overflow:hidden;min-height:108px;border:0;text-align:left}
+.ngan-the .to{font-size:30px} .ngan-the b{display:block;font-size:16px;margin-top:4px} .ngan-the span{font-size:28px;font-weight:800;position:absolute;right:14px;top:10px}
+.ngan-the.dang{outline:4px solid #FDE68A}
+.lop-the{text-align:center} .lop-the .ten-lop{font-size:30px;font-weight:800;color:var(--chinh)}
+.hs-luoi{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:12px}
+.hs{border:1px solid var(--vien);background:#fff;border-radius:12px;padding:8px;text-align:center;font-weight:700;font-size:14px}
+.hs.co{background:#ECFDF5;border-color:#6EE7B7}
+.bai{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid var(--vien);margin-bottom:8px}
+.bai .so-bai{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;background:#EEF2FF;color:var(--chinh);flex:none}
+.tt{border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700;border:0;min-width:96px}
+.tt0{background:#F1F5F9;color:#475569} .tt1{background:#FEF3C7;color:#92400E} .tt2{background:#D1FAE5;color:#065F46}
+.chu-de{margin:16px 0 8px;font-weight:800;color:var(--vang-dam)}
+.lop-phu{position:fixed;inset:0;background:rgba(30,27,75,.45);display:none;place-items:center;z-index:30;padding:16px}
+.lop-phu.mo{display:grid}
+.hop{background:#fff;border-radius:22px;max-width:720px;width:100%;max-height:92vh;overflow:auto;padding:22px;box-shadow:0 30px 80px rgba(30,27,75,.4);animation:hien .25s}
+label.nhan{display:block;font-weight:700;margin:12px 0 6px}
+input.o,select.o,textarea.o{width:100%;font-size:16px;font-family:inherit;padding:12px 14px;border-radius:12px;border:2px solid var(--vien);background:#fff;color:var(--chu)}
+input.o:focus,select.o:focus,textarea.o:focus{outline:0;border-color:var(--chinh)}
+.ai-goi{background:linear-gradient(135deg,#F5F3FF,#EEF2FF);border:1px dashed #A78BFA;border-radius:16px;padding:14px;margin-top:12px}
+.ai-dong{display:grid;grid-template-columns:30px 170px 1fr 52px;gap:8px;align-items:center;margin:6px 0;cursor:pointer;border-radius:10px;padding:4px}
+.ai-dong:hover{background:rgba(124,58,237,.08)} .ai-dong.chon{background:rgba(124,58,237,.15)}
+.ai-dong .thanh i{background:linear-gradient(90deg,#8B5CF6,#EC4899)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:#1E1B4B;color:#fff;border-radius:14px;padding:12px 18px;box-shadow:0 12px 30px rgba(0,0,0,.25);transition:transform .3s;z-index:50;display:flex;gap:12px;align-items:center;max-width:92vw}
+.toast.hien{transform:translateX(-50%) translateY(0)}
+.dong-ho{font-size:72px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;color:var(--chinh);margin:10px 0}
+.canvas-khung{position:relative;height:280px} .canvas-khung canvas{position:absolute;inset:0;width:100%;height:100%}
+table.bang{width:100%;border-collapse:collapse;font-size:14px} .bang th,.bang td{padding:8px;border-bottom:1px solid var(--vien);text-align:left}
+.rung{animation:rung .35s} @keyframes rung{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.nhap-nhay{animation:nn 2.4s ease-in-out infinite} @keyframes nn{50%{transform:translateY(-6px)}}
+.ban-nhap{text-align:center;color:var(--chu-phu);font-size:13px;margin-top:28px}
+/* ---- v2: PPCT, KHBD theo mẫu trường ---- */
+.tuan-nay{background:linear-gradient(120deg,#0F766E,#0EA5E9);color:#fff;border-radius:20px;padding:18px 20px;box-shadow:0 14px 30px rgba(14,116,144,.3);margin-bottom:16px}
+.tuan-nay h3{margin:0 0 4px;font-size:20px} .tuan-nay p{margin:0;color:#E0F2FE}
+.tuan-nay .tiet-o{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.tuan-nay .tiet-o>div{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:14px;padding:10px 12px;flex:1;min-width:180px}
+.tuan-nay .tiet-o b{display:block;font-size:15px} .tuan-nay .tiet-o small{color:#CFFAFE}
+.tuan-nhom{margin:14px 0 6px;font-weight:800;color:var(--vang-dam);display:flex;align-items:center;gap:8px}
+.tuan-nhom.nay{color:#0F766E} .tuan-nhom.nay::after{content:"◀ tuần này";font-size:12px;background:#CCFBF1;color:#0F766E;border-radius:99px;padding:2px 8px}
+.chip-ai{background:linear-gradient(90deg,#EDE9FE,#FCE7F3);color:#6D28D9;border:1px solid #DDD6FE}
+.the-tab{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.soat-tong{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.soat-dong{display:grid;grid-template-columns:30px 1fr;gap:8px;padding:9px 10px;border-radius:12px;margin-bottom:6px;background:#fff;border:1px solid var(--vien)}
+.soat-dong.loi{background:#FEF2F2;border-color:#FCA5A5} .soat-dong.canh{background:#FFFBEB;border-color:#FCD34D} .soat-dong.dat{background:#F0FDF4;border-color:#BBF7D0}
+.soat-dong small{display:block;color:var(--chu-phu)}
+.soat-nhom{font-weight:800;margin:12px 0 6px;color:var(--chinh)}
+.xem-van{white-space:pre-wrap;font-size:14px;line-height:1.55;max-height:340px;overflow:auto;background:#fff;border:1px solid var(--vien);border-radius:12px;padding:12px}
+mark.loi{background:#FECACA;text-decoration:underline wavy #DC2626}
+.khung-xem{background:#fff;border:1px solid #CBD5E1;border-radius:6px;padding:22px 26px;font-family:"Times New Roman",serif;font-size:15px;line-height:1.45;max-height:520px;overflow:auto;color:#111}
+.khung-xem h4{text-align:center;margin:8px 0;font-size:17px} .khung-xem table{width:100%;border-collapse:collapse;margin:6px 0} .khung-xem td,.khung-xem th{border:1px solid #333;padding:6px;vertical-align:top}
+.khung-xem .goi{color:#B45309}
+.trong{text-align:center;padding:26px;color:var(--chu-phu)}
+.pii{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;border-radius:12px;padding:10px 12px;margin-top:10px;display:none}
+.pii.hien{display:block}
+.ngay7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}
+.ngay7 div{background:#fff;border:1px solid var(--vien);border-radius:12px;text-align:center;padding:8px 2px;font-size:13px}
+.ngay7 div.nay{background:var(--chinh);color:#fff} .ngay7 i{display:block;height:8px;width:8px;border-radius:99px;margin:4px auto 0;background:transparent} .ngay7 i.co{background:var(--vang)}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr} .ben{position:static;height:auto;flex-direction:row;overflow-x:auto;padding:8px} .ben .nhom,.ben .chan,.logo small{display:none}
+  .logo{border:0;margin:0;padding:4px 8px} .muc{white-space:nowrap;width:auto} .l4,.l3,.l2{grid-template-columns:1fr 1fr} .than{padding:12px}
+  .chao{flex-direction:column;align-items:flex-start} .ai-dong{grid-template-columns:26px 110px 1fr 44px}
+}
+@media (max-width:560px){.l4,.l3,.l2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<!-- gradient dùng chung (luôn hiển thị) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="gVang" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FDE68A"/><stop offset="1" stop-color="#F59E0B"/></linearGradient>
+  <linearGradient id="gTim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#818CF8"/><stop offset="1" stop-color="#7C3AED"/></linearGradient>
+  <filter id="bong" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity=".18"/></filter>
+</defs></svg>
+
+<div class="app">
+  <nav class="ben" id="ben">
+    <div class="logo">
+      <svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="6" width="44" height="54" rx="8" fill="url(#gVang)" filter="url(#bong)"/><rect x="10" y="6" width="9" height="54" rx="4" fill="#B45309"/><circle cx="34" cy="28" r="3.4" fill="#1E1B4B"/><circle cx="46" cy="28" r="3.4" fill="#1E1B4B"/><path d="M33 38q7 6 14 0" stroke="#1E1B4B" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M50 4l3 6 6 1-5 4 1 6-5-3-5 3 1-6-5-4 6-1z" fill="#fff"/></svg>
+      <div><h1>SỔ TAY VÀNG AI</h1><small>Lưu trọn dữ liệu · tìm lại một chạm</small></div>
+    </div>
+    <div class="nhom">Hằng ngày</div>
+    <button class="muc" data-man="tong-quan">🏠 Tổng quan hôm nay</button>
+    <button class="muc" data-man="kho">🗂️ Kho tài liệu <span class="so" id="soKho">0</span></button>
+    <button class="muc" data-man="tim">🔎 Tìm kiếm thông minh</button>
+    <div class="nhom">Giảng dạy</div>
+    <button class="muc" data-man="lop">🏫 Lớp học (mã HS)</button>
+    <button class="muc" data-man="bai">📘 Bài dạy theo PPCT</button>
+    <button class="muc" data-man="khbd">🏫 KHBD theo mẫu trường</button>
+    <button class="muc" data-man="viec">✅ Công việc & lịch</button>
+    <div class="nhom">Trí tuệ nhân tạo</div>
+    <button class="muc" data-man="ai">🤖 Trợ lý câu lệnh AI</button>
+    <button class="muc" data-man="do">⏱️ Đo hiệu quả</button>
+    <button class="muc" data-man="sao-luu">💾 Sao lưu & cài đặt</button>
+    <div class="chan" id="chanGv"></div>
+  </nav>
+
+  <main class="than">
+    <div class="tren">
+      <label class="o-tim"><span style="font-size:20px">🔎</span><input id="oTim" placeholder="Tìm tài liệu, bài dạy, lớp, mã học sinh, công việc… (gõ không dấu, viết tắt: GA, KT, PHT…)" autocomplete="off"></label>
+      <button class="nut vang" id="nutThem">＋ Thêm tài liệu</button>
+    </div>
+
+    <!-- TỔNG QUAN -->
+    <section class="man" id="man-tong-quan">
+      <div class="canh-bao" id="bao-sao-luu" style="display:none"><span style="font-size:22px">⚠️</span><div style="flex:1"><b>Đã lâu chưa sao lưu.</b> Dữ liệu chỉ nằm trong trình duyệt máy này — thứ Sáu bấm Sao lưu cho chắc nhé.</div><button class="nut nho vang" data-di="sao-luu">Sao lưu ngay</button></div>
+      <div class="chao">
+        <svg class="nhap-nhay" width="120" height="120" viewBox="0 0 120 120" aria-hidden="true"><ellipse cx="60" cy="110" rx="34" ry="6" fill="rgba(0,0,0,.18)"/><rect x="22" y="12" width="76" height="90" rx="12" fill="url(#gVang)"/><rect x="22" y="12" width="15" height="90" rx="6" fill="#B45309"/><circle cx="58" cy="48" r="6" fill="#1E1B4B"/><circle cx="80" cy="48" r="6" fill="#1E1B4B"/><circle cx="60" cy="46" r="2" fill="#fff"/><circle cx="82" cy="46" r="2" fill="#fff"/><path d="M56 64q13 11 26 0" stroke="#1E1B4B" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="50" cy="62" r="4" fill="#FCA5A5" opacity=".7"/><circle cx="90" cy="62" r="4" fill="#FCA5A5" opacity=".7"/><path d="M96 8l4 8 8 1-6 5 2 8-8-4-8 4 2-8-6-5 8-1z" fill="#fff"/></svg>
+        <div style="flex:1">
+          <span class="huy">Năm học 2026 – 2027</span>
+          <h2 id="loiChao">Chào mừng thầy!</h2>
+          <p id="ngayNay"></p>
+          <p style="margin-top:8px">💡 <span id="meoNgay"></span></p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="nut xanh" data-di="bai">▶ Tuần này dạy gì</button>
+          <button class="nut phu" style="background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.4)" data-di="tim">🔎 Tìm tài liệu</button>
+        </div>
+      </div>
+      <div class="luoi l4" style="margin-top:18px" id="kpi"></div>
+      <div class="luoi l2" style="margin-top:18px">
+        <div class="the"><h3 style="margin:0 0 4px">📚 Kệ sách số của thầy</h3><p class="phu" style="margin-bottom:6px">Mỗi ngăn một màu — bấm vào gáy sách để mở ngăn.</p><div class="ke-sach" id="keSach"></div></div>
+        <div class="the"><h3 style="margin:0 0 10px">📅 Việc 7 ngày tới</h3><div class="ngay7" id="ngay7a"></div><div id="viecSap"></div></div>
+      </div>
+      <div class="the" style="margin-top:18px"><h3 style="margin:0 0 10px">🕘 Tài liệu thêm gần đây</h3><div id="ganDay"></div></div>
+    </section>
+
+    <!-- KHO -->
+    <section class="man" id="man-kho">
+      <h2 class="tieu">🗂️ Kho tài liệu — mỗi thứ một ngăn</h2>
+      <p class="phu">Sổ tay không giữ file; nó <b>ghi nhớ file nằm ở đâu</b> (Drive, máy tính, Zalo, tủ hồ sơ) để lần sau tìm lại ngay. AI gợi ý ngăn khi thầy thêm.</p>
+      <div class="luoi l4" id="nganLuoi"></div>
+      <div class="the" style="margin-top:18px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><h3 style="margin:0;flex:1" id="tieuNgan">Tất cả tài liệu</h3><button class="chip" id="boLoc">Bỏ lọc</button></div>
+        <div id="dsKho"></div>
+      </div>
+    </section>
+
+    <!-- TÌM -->
+    <section class="man" id="man-tim">
+      <h2 class="tieu">🔎 Tìm kiếm thông minh</h2>
+      <p class="phu">Hiểu chữ <b>không dấu</b>, <b>viết tắt</b> (GA = giáo án, KT = kiểm tra, PHT = phiếu học tập, BB = biên bản, CV = công văn, SHCM…) và <b>gõ sai nhẹ</b>. Tìm trong tài liệu, bài dạy, lớp, mã HS, công việc.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="locLoai"></div>
+      <div class="the"><div id="kqTomTat" style="margin-bottom:10px;color:var(--chu-phu)"></div><div id="kqTim"></div></div>
+    </section>
+
+    <!-- LỚP -->
+    <section class="man" id="man-lop">
+      <h2 class="tieu">🏫 Lớp học — chỉ dùng mã học sinh</h2>
+      <p class="phu">Không lưu họ tên, số điện thoại, ngày sinh. Bấm một mã để ghi chú tiến bộ (máy tự cảnh báo nếu lỡ gõ thông tin riêng).</p>
+      <div class="luoi l4" id="lopLuoi"></div>
+      <div class="the" style="margin-top:18px" id="lopChiTiet"></div>
+    </section>
+
+    <!-- BÀI -->
+    <section class="man" id="man-bai">
+      <h2 class="tieu" id="baiTieu">📘 Bài dạy Toán 1 — theo phân phối chương trình của trường</h2>
+      <div id="chonMon" style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 8px"></div><div id="tuanMon" class="phu" style="margin:0 0 8px"></div>
+      <p class="phu"><span id="baiNguon">35 tuần · 105 tiết (PPCT Toán 1 năm học 2026–2027 của trường, bộ Kết nối tri thức với cuộc sống).</span> Bấm nhãn để đổi: <span class="tt tt0" style="padding:2px 8px">Chưa soạn</span> → <span class="tt tt1" style="padding:2px 8px">Đã soạn</span> → <span class="tt tt2" style="padding:2px 8px">Đã dạy</span>. Nút 📝 lập ngay khung KHBD đúng mẫu trường cho bài đó.</p>
+      <div class="tuan-nay" id="tuanNay"></div>
+      <div class="luoi l2">
+        <div class="the" id="dsBai"></div>
+        <div class="the" style="align-self:start;position:sticky;top:84px"><h3 style="margin:0 0 8px">Tiến độ năm học</h3><div id="vongTienDo" style="text-align:center"></div><div id="tienDoChu"></div>
+          <label class="nhan">Thứ Hai của tuần 1 (theo khung thời gian năm học)</label><input class="o" type="date" id="tuan1">
+          <p class="phu" style="margin-top:6px;font-size:13px">Tuần nghỉ lễ, Tết thì thầy dời ngày này cho khớp lịch trường.</p></div>
+      </div>
+    </section>
+
+    <!-- KHBD THEO MẪU TRƯỜNG -->
+    <section class="man" id="man-khbd">
+      <h2 class="tieu">🏫 KHBD theo mẫu trường — lập khung đúng mẫu, soát trước khi nộp</h2>
+      <p class="phu">Theo 3 mẫu KHBD và lời «làm rõ, lưu ý» của Trường TH&THCS Đa Phước (bài thường · tiết tăng cường · sinh hoạt lớp), kèm phụ lục <b>địa chỉ lồng ghép giáo dục AI lớp 1</b>. Máy soát chạy ngay trên máy, file không gửi đi đâu.</p>
+      <div class="the-tab" id="khbdTab"></div>
+      <div id="khbdLap" class="luoi l2">
+        <div class="the">
+          <h3 style="margin:0">📝 Thông tin bài</h3>
+          <div class="luoi" style="grid-template-columns:1fr 1fr;gap:10px">
+            <div><label class="nhan">Kiểu KHBD</label><select class="o" id="kbKieu"><option value="thuong">Bài thường (4 hoạt động)</option><option value="tang">Tiết tăng cường (3 hoạt động)</option><option value="shl">Sinh hoạt lớp – HĐTN (5 hoạt động)</option></select></div>
+            <div><label class="nhan">Môn / hoạt động</label><select class="o" id="kbMon"><option>Toán</option><option>Tiếng Việt</option><option>Đạo đức</option><option>Tự nhiên và Xã hội</option><option>Hoạt động trải nghiệm</option><option>Môn khác</option></select></div>
+            <div><label class="nhan">Lớp</label><input class="o" id="kbLop" value="1"></div>
+            <div><label class="nhan">Tiết PPCT (Toán 1)</label><select class="o" id="kbTiet"></select></div>
+          </div>
+          <label class="nhan">Tên bài học</label><input class="o" id="kbTen" placeholder="VD: Khối lập phương, khối hộp chữ nhật">
+          <div class="luoi" style="grid-template-columns:1fr 1fr;gap:10px">
+            <div><label class="nhan">Số tiết của bài</label><input class="o" id="kbSoTiet" type="number" min="1" max="9" value="1"></div>
+            <div><label class="nhan">Soạn theo</label><select class="o" id="kbTheo"><option value="tuan">Tuần (ghi tiết PPCT)</option><option value="bai">Bài (từ ngày … đến ngày …)</option></select></div>
+            <div><label class="nhan">Ngày dạy đầu</label><input class="o" type="date" id="kbTu"></div>
+            <div><label class="nhan">Ngày dạy cuối</label><input class="o" type="date" id="kbDen"></div>
+          </div>
+          <div id="kbAi" style="margin-top:12px"></div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="nut vang" id="kbTai">⬇ Tải khung Word (.doc)</button><button class="nut phu" id="kbLenh">🤖 Soạn câu lệnh AI theo mẫu này</button><button class="nut phu" id="kbSoat">🛡️ Soát khung này</button></div>
+        </div>
+        <div class="the"><h3 style="margin:0 0 8px">👀 Xem trước khung KHBD</h3><div class="khung-xem" id="kbXem"></div></div>
+      </div>
+      <div id="khbdSoat" class="luoi l2" style="display:none">
+        <div class="the">
+          <h3 style="margin:0">🛡️ Đưa KHBD vào để soát</h3>
+          <p class="phu" style="margin:6px 0 0">Mở file Word <b>.docx</b> (máy đọc ngay trên máy) hoặc dán chữ vào ô dưới.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center"><label class="nut phu nho" style="display:inline-flex;align-items:center">📂 Mở file .docx<input type="file" id="ksFile" accept=".docx" style="display:none"></label><select class="o" id="ksKieu" style="width:auto;flex:1;min-width:200px"><option value="thuong">Bài thường (4 hoạt động)</option><option value="tang">Tiết tăng cường</option><option value="shl">Sinh hoạt lớp – HĐTN</option></select><button class="nut nho phu" id="ksMau">Dùng ví dụ có lỗi</button></div>
+          <textarea class="o" id="ksVan" rows="14" style="margin-top:10px;font-size:14px" placeholder="Dán nội dung KHBD vào đây…"></textarea>
+          <button class="nut" style="margin-top:10px" id="ksChay">🛡️ Soát theo mẫu trường</button>
+          <div id="ksXem" style="margin-top:12px"></div>
+        </div>
+        <div class="the" id="ksKq"><div class="trong">Kết quả soát sẽ hiện ở đây: thiếu mục nào, dùng từ trường dặn không ghi, đồ dùng ghi thừa SGK/bảng con, thiếu phân hoá HSHTT/HSCHT, chưa ghi mã lồng ghép AI…</div></div>
+      </div>
+    </section>
+
+    <!-- VIỆC -->
+    <section class="man" id="man-viec">
+      <h2 class="tieu">✅ Công việc & lịch</h2>
+      <p class="phu">Việc quá hạn đỏ, sắp đến hạn vàng, xong xanh. Xong việc bấm vòng tròn.</p>
+      <div class="luoi l2">
+        <div class="the"><div class="ngay7" id="ngay7b"></div><div id="dsViec"></div></div>
+        <div class="the" style="align-self:start"><h3 style="margin:0">＋ Thêm việc</h3>
+          <label class="nhan">Việc cần làm</label><input class="o" id="viecTen" placeholder="VD: Nộp KHBD tuần 8 cho tổ trưởng">
+          <label class="nhan">Hạn</label><input class="o" type="date" id="viecHan">
+          <button class="nut" style="margin-top:14px;width:100%" id="nutThemViec">Lưu việc</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI -->
+    <section class="man" id="man-ai">
+      <h2 class="tieu">🤖 Trợ lý câu lệnh AI — an toàn dữ liệu học sinh</h2>
+      <p class="phu">Thầy chọn việc, điền ý chính → Sổ tay soạn sẵn câu lệnh để dán vào Gemini / ChatGPT. Trước khi sao chép, máy <b>soát thông tin riêng</b> (họ tên, số điện thoại, ngày sinh). Nội dung AI trả về, thầy đọc và sửa trước khi dùng.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="aiViec"></div>
+      <div class="luoi l2">
+        <div class="the" id="aiForm"></div>
+        <div class="the">
+          <div style="display:flex;align-items:center;gap:10px"><svg width="54" height="54" viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="16" width="44" height="36" rx="12" fill="url(#gTim)"/><rect x="29" y="6" width="6" height="10" rx="3" fill="#7C3AED"/><circle cx="32" cy="6" r="4" fill="#FBBF24"/><circle cx="24" cy="33" r="5" fill="#fff"/><circle cx="40" cy="33" r="5" fill="#fff"/><circle cx="24" cy="33" r="2.4" fill="#1E1B4B"/><circle cx="40" cy="33" r="2.4" fill="#1E1B4B"/><path d="M25 43h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg><h3 style="margin:0">Câu lệnh đã soạn</h3></div>
+          <textarea class="o" id="aiKetQua" rows="13" style="margin-top:10px;font-size:15px"></textarea>
+          <div class="pii" id="aiPii"></div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"><button class="nut" id="nutSaoChep">📋 Soát & sao chép</button><button class="nut phu" id="nutGoiYNhanh">✨ Gợi ý nhanh không cần mạng</button></div>
+          <div id="goiYNhanh" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ĐO -->
+    <section class="man" id="man-do">
+      <h2 class="tieu">⏱️ Đo hiệu quả — số liệu thật cho hồ sơ</h2>
+      <p class="phu">Đo <b>số giây để tìm lại một tài liệu</b>: tìm theo cách cũ (bấm giờ tay) và tìm bằng Sổ tay (máy tự ghi từ lúc gõ đến lúc mở kết quả). Mỗi cách 10 lượt, mời thêm đồng nghiệp — ghi bằng mã GV1, GV2…</p>
+      <div class="luoi l2">
+        <div class="the">
+          <div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1;min-width:140px"><label class="nhan">Người đo (mã)</label><input class="o" id="doNguoi" value="GV1"></div><div style="flex:2;min-width:200px"><label class="nhan">Tài liệu cần tìm</label><input class="o" id="doTaiLieu" placeholder="VD: Phiếu học tập bài Mấy và mấy"></div></div>
+          <div class="dong-ho" id="dongHo">0,0 giây</div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="nut vang" id="doBatDau">▶ Bắt đầu đo cách cũ</button><button class="nut xanh" id="doThay" disabled>✔ Tìm thấy rồi</button><button class="nut phu" id="doBo" disabled>Bỏ lượt</button></div>
+          <label style="display:flex;gap:10px;align-items:center;margin-top:16px;font-weight:700"><input type="checkbox" id="doSoTay" style="width:22px;height:22px"> Ghi giờ khi tìm bằng Sổ tay (gõ vào ô tìm kiếm → bấm mở kết quả)</label>
+        </div>
+        <div class="the"><h3 style="margin:0 0 6px">Trung bình (giây / lượt)</h3><div class="canvas-khung"><canvas id="doBieuDo"></canvas></div><div id="doTomTat" style="margin-top:8px"></div></div>
+      </div>
+      <div class="the" style="margin-top:18px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><h3 style="margin:0;flex:1">Nhật ký đo</h3><button class="nut nho phu" id="doXuat">⬇ Xuất CSV</button></div><div id="doBang"></div></div>
+    </section>
+
+    <!-- SAO LƯU -->
+    <section class="man" id="man-sao-luu">
+      <h2 class="tieu">💾 Sao lưu & cài đặt</h2>
+      <p class="phu">Dữ liệu nằm trong trình duyệt <b>máy này</b>. Xoá lịch sử duyệt web hoặc đổi máy sẽ mất nếu chưa sao lưu. Nên sao lưu mỗi thứ Sáu, cất file vào Google Drive của thầy.</p>
+      <div class="luoi l3">
+        <div class="the"><div style="font-size:40px">⬇️</div><h3>Sao lưu</h3><p class="phu">Tải về một file .json chứa toàn bộ sổ tay.</p><button class="nut vang" id="nutSaoLuu">Sao lưu ngay</button><p id="lanSaoLuu" class="phu" style="margin-top:10px"></p></div>
+        <div class="the"><div style="font-size:40px">⬆️</div><h3>Nhập lại</h3><p class="phu">Chọn file sao lưu để khôi phục (máy mới, trình duyệt khác).</p><input type="file" id="fileNhap" accept=".json" class="o"></div>
+        <div class="the"><div style="font-size:40px">🧹</div><h3>Dữ liệu mẫu</h3><p class="phu">Sổ tay có sẵn vài tài liệu, việc <b>mẫu</b> để xem thử. Khi dùng thật, xoá mẫu rồi nhập của mình.</p><button class="nut phu" id="nutXoaMau">Xoá dữ liệu mẫu</button></div>
+      </div>
+      <div class="the" style="margin-top:18px"><h3 style="margin-top:0">Thông tin giáo viên</h3>
+        <div class="luoi l2"><div><label class="nhan">Cách gọi</label><input class="o" id="gvTen"></div><div><label class="nhan">Trường</label><input class="o" id="gvTruong"></div></div>
+        <button class="nut" style="margin-top:12px" id="nutLuuGv">Lưu</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- HỘP THÊM / SỬA TÀI LIỆU -->
+<div class="lop-phu" id="hopTL"><div class="hop">
+  <div style="display:flex;align-items:center;gap:10px"><h2 style="margin:0;flex:1" id="hopTieu">＋ Thêm tài liệu vào sổ</h2><button class="nut nho phu" data-dong>✕</button></div>
+  <label class="nhan">Tên tài liệu</label>
+  <input class="o" id="tlTen" placeholder="VD: Phiếu học tập Toán bài 5 Mấy và mấy">
+  <div class="ai-goi">
+    <div style="display:flex;align-items:center;gap:8px;font-weight:800;color:#6D28D9">🤖 AI gợi ý ngăn <small style="font-weight:500;color:var(--chu-phu)">— máy học ngay trên máy từ <span id="soViDu">0</span> ví dụ; bấm một dòng để chọn</small></div>
+    <div id="aiGoiY"><div class="trong" style="padding:10px">Gõ tên tài liệu, AI sẽ đoán ngăn…</div></div>
+    <div id="aiNhan" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
+  </div>
+  <div class="luoi l2" style="margin-top:4px">
+    <div><label class="nhan">Ngăn</label><select class="o" id="tlNgan"></select></div>
+    <div><label class="nhan">Gắn với bài Toán 1 (nếu có)</label><select class="o" id="tlBai"></select></div>
+  </div>
+  <div class="luoi l2">
+    <div><label class="nhan">Bản gốc nằm ở đâu?</label><select class="o" id="tlNoi"><option value="drive">☁️ Google Drive</option><option value="may">💻 Máy tính</option><option value="dt">📱 Điện thoại</option><option value="zalo">💬 Zalo</option><option value="tu">🗄️ Tủ hồ sơ / bản giấy</option></select></div>
+    <div><label class="nhan">Đường dẫn / vị trí cụ thể</label><input class="o" id="tlDuong" placeholder="VD: Drive › Toán 1 › HK1  ·  Tủ ngăn 2"></div>
+  </div>
+  <label class="nhan">Nhãn (cách nhau dấu phẩy)</label><input class="o" id="tlNhanO" placeholder="VD: toán, lớp 1, HK1">
+  <div class="pii" id="tlPii"></div>
+  <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="nut vang" id="tlLuu">💾 Lưu vào sổ</button><button class="nut phu" id="tlXoa" style="display:none;color:var(--sai)">Xoá tài liệu</button></div>
+</div></div>
+
+<!-- HỘP XEM TÀI LIỆU -->
+<div class="lop-phu" id="hopXem"><div class="hop" id="hopXemNoi"></div></div>
+
+<div class="toast" id="toast"><span id="toastChu"></span><button class="nut nho phu" id="toastNut" style="display:none">Hoàn tác</button></div>
+<canvas id="phao" style="position:fixed;inset:0;pointer-events:none;z-index:60;width:100%;height:100%"></canvas>
+
+<script>
+"use strict";
+/* ================= DỮ LIỆU NỀN ================= */
+const KHOA = "so-tay-vang-ai-v1";
+const NGAN = [
+  {id:"ga", ten:"Giáo án – KHBD", mau:"#6366F1", to:"📘"},
+  {id:"pht",ten:"Phiếu học tập", mau:"#0EA5E9", to:"📝"},
+  {id:"de", ten:"Đề kiểm tra",    mau:"#EF4444", to:"🧪"},
+  {id:"vb", ten:"Văn bản chỉ đạo",mau:"#64748B", to:"📜"},
+  {id:"mc", ten:"Minh chứng",     mau:"#10B981", to:"🏅"},
+  {id:"kh", ten:"Kế hoạch – Biên bản", mau:"#F59E0B", to:"📋"},
+  {id:"tl", ten:"Tư liệu – Slide – Ảnh", mau:"#A855F7", to:"🎨"},
+  {id:"khac",ten:"Khác",          mau:"#94A3B8", to:"📦"}
+];
+const NOI = {drive:"☁️ Google Drive", may:"💻 Máy tính", dt:"📱 Điện thoại", zalo:"💬 Zalo", tu:"🗄️ Tủ hồ sơ / bản giấy"};
+/* Toán 1 — Kết nối tri thức với cuộc sống: tên bài, số tiết theo mục lục SGV (kho bài Triway) */
+const TOAN1 = [
+ ["Các số từ 0 đến 10",[["Tiết học đầu tiên",1],["Các số 0, 1, 2, 3, 4, 5",3],["Các số 6, 7, 8, 9, 10",3],["Nhiều hơn, ít hơn, bằng nhau",2],["So sánh số",4],["Mấy và mấy",3],["Luyện tập chung",4]]],
+ ["Làm quen với một số hình phẳng",[["Hình vuông, hình tròn, hình tam giác, hình chữ nhật",2],["Thực hành lắp ghép, xếp hình",2],["Luyện tập chung",1]]],
+ ["Phép cộng, phép trừ trong phạm vi 10",[["Phép cộng trong phạm vi 10",6],["Phép trừ trong phạm vi 10",6],["Bảng cộng, bảng trừ trong phạm vi 10",3],["Luyện tập chung",3]]],
+ ["Làm quen với một số hình khối",[["Khối lập phương, khối hộp chữ nhật",2],["Vị trí, định hướng trong không gian",2],["Luyện tập chung",1]]],
+ ["Ôn tập học kì 1",[["Ôn tập các số trong phạm vi 10",2],["Ôn tập phép cộng, phép trừ trong phạm vi 10",2],["Ôn tập hình học",1],["Ôn tập chung",1]]],
+ ["Các số đến 100",[["Số có hai chữ số",6],["So sánh số có hai chữ số",3],["Bảng các số từ 1 đến 100",1],["Luyện tập chung",2]]],
+ ["Độ dài và đo độ dài",[["Dài hơn, ngắn hơn",2],["Đơn vị đo độ dài",2],["Thực hành ước lượng và đo độ dài",2],["Luyện tập chung",2]]],
+ ["Phép cộng, phép trừ (không nhớ) trong phạm vi 100",[["Phép cộng số có hai chữ số với số có một chữ số",2],["Phép cộng số có hai chữ số với số có hai chữ số",2],["Phép trừ số có hai chữ số cho số có một chữ số",3],["Phép trừ số có hai chữ số cho số có hai chữ số",3],["Luyện tập chung",4]]],
+ ["Thời gian. Giờ và lịch",[["Xem giờ đúng trên đồng hồ",2],["Các ngày trong tuần",2],["Thực hành xem lịch và giờ",2],["Luyện tập chung",2]]],
+ ["Ôn tập cuối năm",[["Ôn tập các số và phép tính trong phạm vi 10",3],["Ôn tập các số và phép tính trong phạm vi 100",3],["Ôn tập hình học và đo lường",2],["Ôn tập chung",1]]]
+];
+const DS_BAI = []; (()=>{let n=0; TOAN1.forEach((cd,i)=>cd[1].forEach(b=>DS_BAI.push({so:n++, ten:b[0], tiet:b[1], cd:(i+1)+". "+cd[0]})));})();
+
+const PPCT = [[1,"Tiết học đầu tiên",0],[1,"Các số 0,1,2,3,4,5 (T1)",1],[1,"Các số 0, 1,2,3,4,5 (T2)",1],[2,"Các số 0, 1,2,3,4,5 (T3)",1],[2,"Các số 6,7,8,9,10 (T1)",2],[2,"Các số 6,7,8,9,10 (T2)",2],[3,"Các số 6,7,8,9,10 (T3)",2],[3,"Nhiều hơn, ít hơn, bằng nhau (T1)",3],[3,"Nhiều hơn, ít hơn, bằng nhau (T2)",3],[4,"So sánh số (T1)",4],[4,"So sánh số (T2)",4],[4,"So sánh số (T3)",4],[5,"So sánh số (T4)",4],[5,"Mấy và mấy (T1)",5],[5,"Mấy và mấy (T2)",5],[6,"Mấy và mấy (T3)",5],[6,"Luyện tập chung (T1)",6],[6,"Luyện tập chung (T2)",6],[7,"Luyện tập chung (T3)",6],[7,"Luyện tập chung (T4)",6],[7,"Hình vuông, hình tròn, hình tam giác, hình chữ nhật (T1)",7],[8,"Hình vuông, hình tròn, hình tam giác, hình chữ nhật (T2)",7],[8,"Thực hành lắp ghép xếp hình (T1)",8],[8,"Thực hành lắp ghép xếp hình (T2)",8],[9,"Luyện tập chung",9],[9,"Phép cộng trong phạm vi 10 (T1)",10],[9,"Phép cộng trong phạm vi 10 (T2)",10],[10,"Phép cộng trong phạm vi 10 (T3)",10],[10,"Phép cộng trong phạm vi 10 (T4)",10],[10,"Phép cộng trong phạm vi 10 (T5)",10],[11,"Phép cộng trong phạm vi 10 (T6)",10],[11,"Phép trừ trong phạm vi 10 (T1)",11],[11,"Phép trừ trong phạm vi 10 (T2)",11],[12,"Phép trừ trong phạm vi 10 (T3)",11],[12,"Phép trừ trong phạm vi 10 (T4)",11],[12,"Phép trừ trong phạm vi 10 (T5)",11],[13,"Phép trừ trong phạm vi 10 (T6)",11],[13,"Bảng cộng, bảng trừ trong phạm vi 10 (T1)",12],[13,"Bảng cộng, bảng trừ trong phạm vi 10 (T2)",12],[14,"Bảng cộng, bảng trừ trong phạm vi 10 (T3)",12],[14,"Luyện tập chung (T1)",13],[14,"Luyện tập chung (T2)",13],[15,"Luyện tập chung (T3)",13],[15,"Khối lập phương, khối hộp chữ nhật (T1)",14],[15,"Khối lập phương, khối hộp chữ nhật (T2)",14],[16,"Vị trí định hướng trong không gian (T1)",15],[16,"Vị trí định hướng trong không gian (T2)",15],[16,"Vị trí định hướng trong không gian (T3)",15],[17,"Luyện tập chung",16],[17,"Ôn tập các số trong phạm vi 10 (T1)",17],[17,"Ôn tập các số trong phạm vi 10 (T1)",17],[18,"Ôn tập phép cộng, phép trừ trong phạm vi 10",18],[18,"Ôn tập hình học",19],[18,"Ôn tập chung",20],[19,"Bài 21: Số có hai chữ số - Tiết 1",21],[19,"Bài 21: Số có hai chữ số - Tiết 2",21],[19,"Bài 21: Số có hai chữ số - Tiết 3",21],[20,"Bài 21: Số có hai chữ số - Tiết 4",21],[20,"Bài 21: Số có hai chữ số - Tiết 5",21],[20,"Bài 21: Số có hai chữ số - Tiết 6",21],[21,"Bài 22: So sánh số có hai chữ số - Tiết 1",22],[21,"Bài 22: So sánh số có hai chữ số - Tiết 2",22],[21,"Bài 22: So sánh số có hai chữ số - Tiết 3",22],[22,"Bài 23: Bảng các số từ 1 đến 100",23],[22,"Bài 24: Luyện tập chung - Tiết 1",24],[22,"Bài 24: Luyện tập chung - Tiết 2",24],[23,"Bài 25: Dài hơn, ngắn hơn - Tiết 1",25],[23,"Bài 25: Dài hơn, ngắn hơn - Tiết 2",25],[23,"Bài 26: Đơn vị đo độ dài - Tiết 1",26],[24,"Bài 26: Đơn vị đo độ dài - Tiết 2",26],[24,"Bài 27: Thực hành ước lượng và đo độ dài - Tiết 1",27],[24,"Bài 27: Thực hành ước lượng và đo độ dài - Tiết 2",27],[25,"Bài 28: Luyện tập chung - Tiết 1",28],[25,"Bài 28: Luyện tập chung - Tiết 2",28],[25,"Bài 29: Phép cộng số có hai chữ số với số có một chữ số - Tiết 1",29],[26,"Bài 29: Phép cộng số có hai chữ số với số có một chữ số - Tiết 2",29],[26,"Bài 30: Phép cộng số có hai chữ số với số có hai chữ số - Tiết 1",30],[26,"Bài 30: Phép cộng số có hai chữ số với số có hai chữ số - Tiết 2",30],[27,"Bài 31: Phép trừ số có hai chữ số cho số có một chữ số - Tiết 1",31],[27,"Bài 31: Phép trừ số có hai chữ số cho số có một chữ số - Tiết 2",31],[27,"Bài 31: Phép trừ số có hai chữ số cho số có một chữ số - Tiết 3",31],[28,"Bài 32: Phép trừ số có hai chữ số cho số có hai chữ số - Tiết 1",32],[28,"Bài 32: Phép trừ số có hai chữ số cho số có hai chữ số - Tiết 2",32],[28,"Bài 32: Phép trừ số có hai chữ số cho số có hai chữ số - Tiết 3",32],[29,"Bài 33: Luyện tập chung - Tiết 1",33],[29,"Bài 33: Luyện tập chung - Tiết 2",33],[29,"Bài 33: Luyện tập chung - Tiết 3",33],[30,"Bài 33: Luyện tập chung - Tiết 4",33],[30,"Bài 34: Xem giờ đúng trên đồng hồ - Tiết 1",34],[30,"Bài 34: Xem giờ đúng trên đồng hồ - Tiết 2",34],[31,"Bài 35: Các ngày trong tuần - Tiết 1",35],[31,"Bài 35: Các ngày trong tuần - Tiết 2",35],[31,"Bài 36: Thực hành xem lịch và giờ - Tiết 1",36],[32,"Bài 36: Thực hành xem lịch và giờ - Tiết 2",36],[32,"Bài 37: Luyện tập chung - Tiết 1",37],[32,"Bài 37: Luyện tập chung - Tiết 2",37],[33,"Bài 38: Ôn tập các số và phép tính trong phạm vi 10 - Tiết 1",38],[33,"Bài 38: Ôn tập các số và phép tính trong phạm vi 10 - Tiết 2",38],[33,"Bài 38: Ôn tập các số và phép tính trong phạm vi 10 - Tiết 3",38],[34,"Bài 39: Ôn tập các số và phép tính trong phạm vi 100 - Tiết 1",39],[34,"Bài 39: Ôn tập các số và phép tính trong phạm vi 100 - Tiết 2",39],[34,"Bài 39: Ôn tập các số và phép tính trong phạm vi 100 - Tiết 3",39],[35,"Bài 40: Ôn tập hình học và đo lường - Tiết 1",40],[35,"Bài 40: Ôn tập hình học và đo lường - Tiết 2",40],[35,"Bài 41: Ôn tập chung",41]]; /* PPCT Toán 1 của trường 2026–2027: [tuần, tên tiết, chỉ số bài]; tiết = vị trí + 1 */
+const GC_TOAN = {"8":"Năng lực số: 4.3CB1a","21":"Tích hợp CDS","31":"Tích hợp CDS","34":"Năng lực số 2.1.CB1a","46":"Năng lực số 5.1.CB1a","47":"Tích hợp CDS","64":"Tích hợp NLS số 1.1.CB1a","66":"Tích hợp LTCM","69":"Tích hợp NLS số 1.1.CB1a","70":"Tích hợp NLS: 5.2.CB1a","76":"Tích hợp NLS: 5.2.CB1a","78":"Tích hợp NLS: 5.2.CB1a","79":"Tích hợp ATGT","91":"Tích hợp NLS: 6.1.CB1a","92":"Tích hợp QPAN","102":"Tích hợp CDS","104":"Tích hợp NLS 5.2.CB1a","105":"Tích hợp NLS 5.2.CB1a"}; /* ghi chú tích hợp Toán 1 — Phụ lục KHDH lớp 1 của trường */
+const PPCT_MON = {"tv":{"ten":"Tiếng Việt 1","icon":"📖","kb":"Tiếng Việt","tu":["tv","tieng viet"],"ds":[[1,"Làm quen với trường lớp, bạn bè, đồ dùng học tập","Tích hợp QCN, KNS","Tuần mở đầu"],[1,"Làm quen với trường lớp, bạn bè, đồ dùng học tập",""],[1,"Làm quen với tư thế đọc viết nói nghe","Tích hợp QCN, KNS"],[1,"Làm quen với tư thế đọc viết nói nghe","Tích hợp QCN, KNS"],[1,"Làm quen với các nét viết cơ bản, các chữ số và dấu thanh; làm quen với bảng chữ cái",""],[1,"Làm quen với các nét viết cơ bản, các chữ số và dấu thanh; làm quen với bảng chữ cái",""],[1,"Làm quen với các nét viết cơ bản, các chữ số và dấu thanh; làm quen với bảng chữ cái",""],[1,"Làm quen với các nét viết cơ bản, các chữ số và dấu thanh; làm quen với bảng chữ cái",""],[1,"Làm quen với các nét viết cơ bản, các chữ số và dấu thanh; làm quen với bảng chữ cái",""],[1,"Làm quen với các nét viết cơ bản, các chữ số và dấu thanh; làm quen với bảng chữ cái",""],[1,"Làm quen với trường lớp, bạn bè, đồ dùng học tập",""],[1,"Làm quen với trường lớp, bạn bè, đồ dùng học tập",""],[2,"Bài 1: A a","","Âm"],[2,"Bài 1: A a",""],[2,"Bài 2: B b. Dấu huyền",""],[2,"Bài 2: B b. Dấu huyền",""],[2,"Bài 3: C c. Dấu sắc",""],[2,"Bài 3: C c. Dấu sắc",""],[2,"Bài 4: E e, Ê ê",""],[2,"Bài 4: E e, Ê ê",""],[2,"Bài 5: Ôn tập và kể chuyện",""],[2,"Bài 5: Ôn tập và kể chuyện","Tích hợp LTCM"],[2,"Ôn đọc, viết",""],[2,"Ôn đọc, viết",""],[3,"Bài 6: O o. Dấu hỏi",""],[3,"Bài 6: O o. Dấu hỏi",""],[3,"Bài 7: Ô ô. Dấu nặng","Tích hợp ATGT"],[3,"Bài 7: Ô ô. Dấu nặng",""],[3,"Bài 8: D d, Đ d",""],[3,"Bài 8: D d, Đ d",""],[3,"Bài 9: Ơ ơ. Dấu ngã","Tích hợp BVMT"],[3,"Bài 9: Ơ ơ. Dấu ngã",""],[3,"Bài 10: Ôn tập và kể chuyện",""],[3,"Bài 10: Ôn tập và kể chuyện","Tích hợp LTCM"],[3,"Ôn tập: Luyện đọc, viết o, ô",""],[3,"Ôn tập: Luyện đọc, viết ơ, d, đ",""],[4,"Bài 11: I i, K k",""],[4,"Bài 11: I i, K k",""],[4,"Bài 12: H h, L l",""],[4,"Bài 12: H h, L l",""],[4,"Bài 13: U u, Ư ư",""],[4,"Bài 13: U u, Ư ư",""],[4,"Bài 14: Ch ch, Kh kh",""],[4,"Bài 14: Ch ch, Kh kh",""],[4,"Bài 15: Ôn tập và kể chuyện",""],[4,"Bài 15: Ôn tập và kể chuyện","Tích hợp LTCM"],[4,"Ôn tập: Luyện đọc, viết i, k, h, l",""],[4,"Ôn tập: Luyện đọc, viết u, ư, ch, kh",""],[5,"Bài 16: M m, N n",""],[5,"Bài 16: M m, N n",""],[5,"Bài 17: G g, Gi gi",""],[5,"Bài 17: G g, Gi gi",""],[5,"Bài 18: Gh gh, Nh nh",""],[5,"Bài 18: Gh gh, Nh nh",""],[5,"Bài 19: Ng ng, Ngh ngh",""],[5,"Bài 19: Ng ng, Ngh ngh","Tích hợp BVMT"],[5,"Bài 20: Ôn tập và kể chuyện",""],[5,"Bài 20: Ôn tập và kể chuyện","Tích hợp LTCM"],[5,"Ôn tập: Luyện đọc, viết m, n, g, gi",""],[5,"Ôn tập: Luyện đọc, viết gh, nh, ng, ngh",""],[6,"Bài 21: R r S s",""],[6,"Bài 21: R r S s",""],[6,"Bài 22: T t Tr tr",""],[6,"Bài 22: T t Tr tr","Tích hợp QPAN, BVMT"],[6,"Bài 23: Th th ia",""],[6,"Bài 23: Th th ia","Tích hợp QPAN"],[6,"Bài 24: ua ưa",""],[6,"Bài 24: ua ưa",""],[6,"Bài 25: Ôn tập và kể chuyện",""],[6,"Bài 25: Ôn tập và kể chuyện","Tích hợp QCN"],[6,"Ôn tập: Luyện đọc, viết r, s, t, t",""],[6,"Ôn tập: Luyện đọc, viết th, ia, ua, ưa",""],[7,"Bài 26: Ph ph, Qu qu",""],[7,"Bài 26: Ph ph, Qu qu",""],[7,"Bài 27: V v, X x",""],[7,"Bài 27: V v, X x",""],[7,"Bài 28: Y y",""],[7,"Bài 28: Y y",""],[7,"Bài 29: Luyện tập chính tả",""],[7,"Bài 29: Luyện tập chính tả",""],[7,"Bài 30: Ôn tập và kể chuyện",""],[7,"Bài 30: Ôn tập và kể chuyện","Tích hợp LTCM"],[7,"Ôn tập: Luyện đọc, viết ph, qu, v, x",""],[7,"Ôn tập: Luyện viết đúng chính tả",""],[8,"Bài 31: an, ăn, ân","","Vần"],[8,"Bài 31: an, ăn, ân",""],[8,"Bài 32: on, ôn, ơn",""],[8,"Bài 32: on, ôn, ơn",""],[8,"Bài 33: en, ên, in, un",""],[8,"Bài 33: en, ên, in, un",""],[8,"Bài 34: am, ăm, âm",""],[8,"Bài 34: am, ăm, âm","Tích hợp BVMT"],[8,"Bài 35: Ôn tập và kể chuyện",""],[8,"Bài 35: Ôn tập và kể chuyện","Tích hợp QCN, KNS"],[8,"Ôn tập: Luyện đọc, viết an, ăn, ân, on, ôn, ơn",""],[8,"Ôn tập: Luyện đọc, viết en, ên, un, in, am, ăm, âm",""],[9,"Bài 36: om, ôm, ơm",""],[9,"Bài 36: om, ôm, ơm",""],[9,"Bài 37: em, êm, im, um",""],[9,"Bài 37: em, êm, im, um",""],[9,"Bài 38: ai, ay, ây",""],[9,"Bài 38: ai, ay, ây",""],[9,"Bài 39: oi, ôi, ơi",""],[9,"Bài 39: oi, ôi, ơi",""],[9,"Bài 40: Ôn tập và kể chuyện",""],[9,"Bài 40: Ôn tập và kể chuyện","Tích hợp LTCM"],[9,"Ôn tập: Luyện đọc, viết om, ôm, ơm, em , êm, im, um",""],[9,"Ôn tập: Luyện đọc, viết ai, ay, ây, oi, ôi, ơi",""],[10,"Bài 41: ui, ưi",""],[10,"Bài 41: ui, ưi",""],[10,"Bài 42: ao, eo",""],[10,"Bài 42: ao, eo","Tích hợp QPAN, BVMT"],[10,"Bài 43: au, âu, êu",""],[10,"Bài 43: au, âu, êu",""],[10,"Bài 44: iu, ưu",""],[10,"Bài 44: iu, ưu",""],[10,"Bài 45: Ôn tập và kể chuyện",""],[10,"Bài 45: Ôn tập và kể chuyện","Tích hợp LTCM, QCN"],[10,"Ôn tập: Luyện đọc, viết ui, ưi, ao, eo",""],[10,"Ôn tập: Luyện đọc, viết au, âu, êu, iu, ưu",""],[11,"Bài 46: ac, ăc, âc","Tích hợp QPAN"],[11,"Bài 46: ac, ăc, âc",""],[11,"Bài 47: oc, ôc, uc, ưc",""],[11,"Bài 47: oc, ôc, uc, ưc",""],[11,"Bài 48: at, ăt, ât",""],[11,"Bài 48: at, ăt, ât",""],[11,"Bài 49: ot, ôt, ơt","Tích hợp QPAN"],[11,"Bài 49: ot, ôt, ơt","Tích hợp QPAN"],[11,"Bài 50: Ôn tập và kể chuyện",""],[11,"Bài 50: Ôn tập và kể chuyện","Tích hợp LTCM, KNS"],[11,"Ôn tập: Luyện đọc, viết ac, ăc, âc, oc, ôc, uc, ưc",""],[11,"Ôn tập: Luyện đọc, viết at, ăt, ât, ot, ôt, ơt",""],[12,"Bài 51: et, êt, it",""],[12,"Bài 51: et, êt, it",""],[12,"Bài 52: ut, ưt",""],[12,"Bài 52: ut, ưt",""],[12,"Bài 53: ap, ăp, âp",""],[12,"Bài 53: ap, ăp, âp",""],[12,"Bài 54: op, ôp, ơp",""],[12,"Bài 54: op, ôp, ơp",""],[12,"Bài 55: Ôn tập và kể chuyện",""],[12,"Bài 55: Ôn tập và kể chuyện","Tích hợp LTCM"],[12,"Ôn tập: Luyện đọc, viết et, êt, it, ut, ưt",""],[12,"Ôn tập: Luyện đọc, viết ap, ăp, âp, op, ôp, ơp",""],[13,"Bài 56: ep, êp, ip, up",""],[13,"Bài 56: ep, êp, ip, up",""],[13,"Bài 57: anh, ênh, inh",""],[13,"Bài 57: anh, ênh, inh",""],[13,"Bài 58: ach, êch, ich",""],[13,"Bài 58: ach, êch, ich",""],[13,"Bài 59: ang, ăng, âng",""],[13,"Bài 59: ang, ăng, âng",""],[13,"Bài 60: Ôn tập và kể chuyện",""],[13,"Bài 60: Ôn tập và kể chuyện","Tích hợp LTCM"],[13,"Ôn tập: Luyện đọc, viết ep,êp, ip, up, anh, ênh, inh",""],[13,"Ôn tập: Luyện đọc, viết ach, êch, ich, ang, ăng, âng",""],[14,"Bài 61: ong, ông, ung, ưng",""],[14,"Bài 61: ong, ông, ung, ưng","Tích hợp LTCM , QPAN"],[14,"Bài 62: iêc, iên, iêp",""],[14,"Bài 62: iêc, iên, iêp","Tích hợp QPAN"],[14,"Bài 63: iêng, iêm, iên","Tích hợp BVMT, QPAN"],[14,"Bài 63: iêng, iêm, iên",""],[14,"Bài 64: iêt, iêu, yêu",""],[14,"Bài 64: iêt, iêu, yêu",""],[14,"Bài 65: Ôn tập và kể chuyện",""],[14,"Bài 65: Ôn tập và kể chuyện","Tích hợp LTCM"],[14,"Ôn tập: Luyện đọc, viết ong, ông, ung, ưng, iêc, iên, iêp",""],[14,"Ôn tập: Luyện đọc, viết iêng, iêm, yên, iêt, iêu, yêu",""],[15,"Bài 66: uôi, uôm","Tích hợp BVMT, ATGT"],[15,"Bài 66: uôi, uôm",""],[15,"Bài 67: uôc, uôt",""],[15,"Bài 67: uôc, uôt",""],[15,"Bài 68: uôn uông",""],[15,"Bài 68: uôn uông",""],[15,"Bài 69: ươi ươu",""],[15,"Bài 69: ươi ươu",""],[15,"Bài 70: Ôn tập và kể chuyện",""],[15,"Bài 70: Ôn tập và kể chuyện","Tích hợp LTCM"],[15,"Ôn tập: Luyện đọc, viết uôi, uôm, uôt, uôc",""],[15,"Ôn tập: Luyện đọc, viết uôn, uông, ươi, ươu",""],[16,"Bài 71: ươc ươt",""],[16,"Bài 71: ươc ươt",""],[16,"Bài 72: ươm ươp",""],[16,"Bài 72: ươm ươp",""],[16,"Bài 73: ươn ương",""],[16,"Bài 73: ươn ương",""],[16,"Bài 74: oa oe",""],[16,"Bài 74: oa oe",""],[16,"Bài 75: Ôn tập và kể chuyện",""],[16,"Bài 75: Ôn tập và kể chuyện","Tích hợp LTCM,BVMT"],[16,"Ôn tập: Luyện đọc, viết ươc, ươt, ươm, ươp",""],[16,"Ôn tập: Luyện đọc, viết ươn, ương, oa, oe",""],[17,"Bài 76: oan, oăn, oat, oăt",""],[17,"Bài 76: oan, oăn, oat, oăt",""],[17,"Bài 77: oai, uê, uy",""],[17,"Bài 77: oai, uê, uy",""],[17,"Bài 78: uân, uât","Tích hợp: QPAN, LTCM"],[17,"Bài 78: uân, uât",""],[17,"Bài 79: uyên, uyêt",""],[17,"Bài 79: uyên, uyêt","Tích hợp: QPAN, LTCM"],[17,"Bài 80: Ôn tập và kể chuyện",""],[17,"Bài 80: Ôn tập và kể chuyện","Tích hợp: QCN, LTCM"],[17,"Ôn tập: Luyện đọc, viết oan, oăn, oat, oăt, oai, uê, uy",""],[17,"Ôn tập: Luyện đọc, viết uân, uât, uyên, uyêt",""],[18,"Bài 81: Ôn tập","","VẦN"],[18,"Bài 81: Ôn tập",""],[18,"Bài 82: Ôn tập",""],[18,"Bài 82: Ôn tập",""],[18,"Bài 83: Ôn tập",""],[18,"Bài 83: Ôn tập",""],[18,"Ôn tập: Luyện đọc, viết các chữ hoa",""],[18,"Ôn tập: Luyện đọc, viết các chữ hoa",""],[18,"Đánh giá cuối kì",""],[18,"Đánh giá cuối kì",""],[18,"Tổng kết",""],[18,"Tổng kết",""],[19,"Bài 1: Tôi là học sinh lớp 1- Tiết 1","Tích hợp: QCN","TÔI VÀ CÁC BẠN - 20 tiết"],[19,"Bài 1: Tôi là học sinh lớp 1- Tiết 2",""],[19,"Bài 1: Tôi là học sinh lớp 1- Tiết 3",""],[19,"Bài 1: Tôi là học sinh lớp 1- Tiết 4",""],[19,"Bài 2: Đôi tai xấu xí - Tiết 1","Tích hợp: QCN, LTCM"],[19,"Bài 2: Đôi tai xấu xí - Tiết 2",""],[19,"Bài 2: Đôi tai xấu xí - Tiết 3",""],[19,"Bài 2: Đôi tai xấu xí - Tiết 4",""],[19,"Bài 3: Bạn của gió - Tiết 1",""],[19,"Bài 3: Bạn của gió - Tiết 2",""],[19,"Ôn luyện tuần 19 - tiết 1",""],[19,"Ôn luyện tuần 19 - tiết 2",""],[20,"Bài 4: Giải thưởng tình bạn - Tiết 1","Tích hợp: QCN"],[20,"Bài 4: Giải thưởng tình bạn - Tiết 2","Tích hợp: LTCM, KNS"],[20,"Bài 4: Giải thưởng tình bạn - Tiết 3",""],[20,"Bài 4: Giải thưởng tình bạn - Tiết 4",""],[20,"Bài 5: Sinh nhật của voi con - Tiết 1",""],[20,"Bài 5: Sinh nhật của voi con - Tiết 2","Tích hợp: QCN, KNS"],[20,"Bài 5: Sinh nhật của voi con - Tiết 3",""],[20,"Bài 5: Sinh nhật của voi con - Tiết 4",""],[20,"Ôn tập - Tiết 1",""],[20,"Ôn tập - Tiết 2",""],[20,"Ôn luyện tuần 20 - tiết 1",""],[20,"Ôn luyện tuần 20 - tiết 2",""],[21,"Bài 1: Nụ hôn trên bàn tay - Tiết 1","Tích hợp: QCN, LTCM","MÁI ẤM GIA ĐÌNH"],[21,"Bài 1: Nụ hôn trên bàn tay - Tiết 2",""],[21,"Bài 1: Nụ hôn trên bàn tay - Tiết 3",""],[21,"Bài 1: Nụ hôn trên bàn tay - Tiết 4",""],[21,"Bài 2: Làm Anh - Tiết 1","Tích hợp: QCN, KNS"],[21,"Bài 2: Làm Anh - Tiết 2",""],[21,"Bài 3: Cả nhà đi chơi núi - Tiết 1",""],[21,"Bài 3: Cả nhà đi chơi núi - Tiết 2","Tích hợp: KNS, BVMT"],[21,"Bài 3: Cả nhà đi chơi núi - Tiết 3",""],[21,"Bài 3: Cả nhà đi chơi núi - Tiết 4",""],[21,"Ôn luyện tuần 21 - tiết 1",""],[21,"Ôn luyện tuần 21 - tiết 2",""],[22,"Bài 4: Quạt cho bà ngủ - Tiết 1","Tích hợp: LTCM"],[22,"Bài 4: Quạt cho bà ngủ - Tiết 2",""],[22,"Bài 5: Bữa cơm gia đình - Tiết 1","Tích hợp: LTCM"],[22,"Bài 5: Bữa cơm gia đình - Tiết 2",""],[22,"Bài 5: Bữa cơm gia đình - Tiết 3",""],[22,"Bài 5: Bữa cơm gia đình - Tiết 4",""],[22,"Bài 6: Ngôi nhà - Tiết 1","Tích hợp: QCN, KNS"],[22,"Bài 6: Ngôi nhà - Tiết 2",""],[22,"Ôn tập - Tiết 1",""],[22,"Ôn tập - Tiết 2",""],[22,"Ôn luyện tuần 22 - tiết 1",""],[22,"Ôn luyện tuần 22 - tiết 2",""],[23,"Bài 1: Tôi đi học - Tiết 1","Tích hợp: QCN","MÁI TRƯỜNG MẾN YÊU"],[23,"Bài 1: Tôi đi học - Tiết 2","Tích hợp: LTCM, QPAN"],[23,"Bài 1: Tôi đi học - Tiết 3",""],[23,"Bài 1: Tôi đi học - Tiết 4",""],[23,"Bài 2: Đi học- Tiết 1",""],[23,"Bài 2: Đi học- Tiết 2",""],[23,"Bài 3: Hoa yêu thương - Tiết 1",""],[23,"Bài 3: Hoa yêu thương - Tiết 2","Tích hợp: LTCM"],[23,"Bài 3: Hoa yêu thương - Tiết 3",""],[23,"Bài 3: Hoa yêu thương - Tiết 4",""],[23,"Ôn luyện tuần 23 - Tiết 1",""],[23,"Ôn luyện tuần 23 - tiết 2",""],[24,"Bài 4: Cây bàng và lớp học- Tiết 1","Tích hợp: BVMT"],[24,"Bài 4: Cây bàng và lớp học- Tiết 2",""],[24,"Bài 5: Bác trống trường - Tiết 1","Tích hợp: LTCM"],[24,"Bài 5: Bác trống trường - Tiết 2",""],[24,"Bài 5: Bác trống trường - Tiết 3",""],[24,"Bài 5: Bác trống trường - Tiết 4",""],[24,"Bài 6: Giờ ra chơi - Tiết 1","Tích hợp: QCN, KNS"],[24,"Bài 6: Giờ ra chơi - Tiết 2",""],[24,"Ôn tập - Tiết 1",""],[24,"Ôn tập - Tiết 2",""],[24,"Luyện tập tuần 24 - Tiết 1",""],[24,"Luyện tập tuần 24 - Tiết 2",""],[25,"Bài 1: Rửa tay trước khi ăn - Tiết 1","Tích hợp: QCN, KNS","ĐIỀU EM CẦN BIẾT"],[25,"Bài 1: Rửa tay trước khi ăn - Tiết 2","Tích hợp: LTCM"],[25,"Bài 1: Rửa tay trước khi ăn - Tiết 3",""],[25,"Bài 1: Rửa tay trước khi ăn - Tiết 4",""],[25,"Bài 2: Lời chào - Tiết 1","Tích hợp: LTCM, KNS"],[25,"Bài 2: Lời chào - Tiết 2",""],[25,"Bài 3: Khi mẹ vắng nhà - Tiết 1","Tích hợp: QCN, KNS, Năng lực số 4.1.CB1b"],[25,"Bài 3: Khi mẹ vắng nhà - Tiết 2",""],[25,"Bài 3: Khi mẹ vắng nhà - Tiết 3",""],[25,"Bài 3: Khi mẹ vắng nhà - Tiết 4",""],[25,"Luyện tập tuần 25 - Tiết 1",""],[25,"Luyện tập tuần 25 - Tiết 2",""],[26,"Bài 4: Nếu không may bị lạc - Tiết 1","Tích hợp: QCN, KNS"],[26,"Bài 4: Nếu không may bị lạc - Tiết 2","Tích hợp: KNS, NLS 2.3.CB1a"],[26,"Bài 4: Nếu không may bị lạc - Tiết 3","Tích hợp: QPAN"],[26,"Bài 4: Nếu không may bị lạc - Tiết 4",""],[26,"Bài 5: Đèn giao thông - Tiết 1","Tích hợp: KNS"],[26,"Bài 5: Đèn giao thông - Tiết 2",""],[26,"Bài 5: Đèn giao thông - Tiết 3",""],[26,"Bài 5: Đèn giao thông - Tiết 4",""],[26,"Ôn tập - Tiết 1",""],[26,"Ôn tập - Tiết 2",""],[26,"Luyện tập tuần 26 - Tiết 1",""],[26,"Luyện tập tuần 26 - Tiết 2",""],[27,"Bài 1: Kiến và chim bồ câu - Tiết 1","Tích hợp: LTCM","BÀI HỌC TỪ CUỘC SỐNG"],[27,"Bài 1: Kiến và chim bồ câu - Tiết 2",""],[27,"Bài 1: Kiến và chim bồ câu - Tiết 3",""],[27,"Bài 1: Kiến và chim bồ câu - Tiết 4",""],[27,"Bài 2: Câu chuyện của rễ - Tiết 1","Tích hợp: BVMT"],[27,"Bài 2: Câu chuyện của rễ - Tiết 2",""],[27,"Bài 3: Câu hỏi của sói - Tiết 1","Tích hợp: LTCM, KNS"],[27,"Bài 3: Câu hỏi của sói - Tiết 2",""],[27,"Bài 3: Câu hỏi của sói - Tiết 3",""],[27,"Bài 3: Câu hỏi của sói - Tiết 4",""],[27,"Luyện tập tuần 27 - Tiết 1",""],[27,"Luyện tập tuần 27 - Tiết 2",""],[28,"Bài 4: Chú bé chăn cừu - Tiết 1","Tích hợp: LTCM, NLS 1.2.CB1a"],[28,"Bài 4: Chú bé chăn cừu - Tiết 2",""],[28,"Bài 4: Chú bé chăn cừu - Tiết 3",""],[28,"Bài 4: Chú bé chăn cừu - Tiết 4",""],[28,"Bài 5: Tiếng vọng của núi - Tiết 1","Tích hợp: KNS"],[28,"Bài 5: Tiếng vọng của núi - Tiết 2",""],[28,"Bài 5: Tiếng vọng của núi - Tiết 3",""],[28,"Bài 5: Tiếng vọng của núi - Tiết 4",""],[28,"Ôn tập - Tiết 1",""],[28,"Ôn tập - Tiết 2",""],[28,"Luyện tập tuần 28 - Tiết 1",""],[28,"Luyện tập tuần 28 - Tiết 2",""],[29,"Bài 1: Loài chim của biển cả - Tiết 1","Tích hợp: BVMT","THIÊN NHIÊN KÌ THÚ"],[29,"Bài 1: Loài chim của biển cả - Tiết 2",""],[29,"Bài 1: Loài chim của biển cả - Tiết 3",""],[29,"Bài 1: Loài chim của biển cả - Tiết 4","Tích hợp: BVMT, NLS 1.1.CB1a"],[29,"Bài 2: Bảy sắc cầu vồng - Tiết 1",""],[29,"Bài 2: Bảy sắc cầu vồng - Tiết 2","Tích hợp: BVMT"],[29,"Bài 3: Chúa tể rừng xanh - Tiết 1",""],[29,"Bài 3: Chúa tể rừng xanh - Tiết 2","Tích hợp: BVMT"],[29,"Bài 3: Chúa tể rừng xanh - Tiết 3",""],[29,"Bài 3: Chúa tể rừng xanh - Tiết 4",""],[29,"Luyện tập tuần 29 - Tiết 1","Tích hợp: BVMT"],[29,"Luyện tập tuần 29 - Tiết 2",""],[30,"Bài 4: Cuộc thi tài năng rừng xanh - Tiết 1","Tích hợp: QCN, KNS"],[30,"Bài 4: Cuộc thi tài năng rừng xanh - Tiết 2","Tích hợp: BVMT"],[30,"Bài 4: Cuộc thi tài năng rừng xanh - Tiết 3","Tích hợp: KNS"],[30,"Bài 4: Cuộc thi tài năng rừng xanh - Tiết 4","Tích hợp: NLS 5.2.CB1a"],[30,"Bài 5: Cây liễu dẻo dai - Tiết 1",""],[30,"Bài 5: Cây liễu dẻo dai - Tiết 2","Tích hợp: BVMT"],[30,"Bài 5: Cây liễu dẻo dai - Tiết 3","Tích hợp: BVMT"],[30,"Bài 5: Cây liễu dẻo dai - Tiết 4",""],[30,"Ôn tập- Tiết 1",""],[30,"Ôn tập- Tiết 2",""],[30,"Luyện tập tuần 30 - Tiết 1",""],[30,"Luyện tập tuần 30 - Tiết 2",""],[31,"Bài 1: Tia nắng đi đâu? - Tiết 1","","THẾ GIỚI TRONG MẮT EM"],[31,"Bài 1: Tia nắng đi đâu? - Tiết 2","Tích hợp: LTCM"],[31,"Bài 2: Trong giấc mơ buổi sáng - Tiết 1",""],[31,"Bài 2: Trong giấc mơ buổi sáng - Tiết 2","Tích hợp: LTCM"],[31,"Bài 3: Ngày mới bắt đầu - Tiết 1",""],[31,"Bài 3: Ngày mới bắt đầu - Tiết 2","Tích hợp: KNS"],[31,"Bài 3: Ngày mới bắt đầu - Tiết 3",""],[31,"Bài 3: Ngày mới bắt đầu - Tiết 4",""],[31,"Bài 4: Hỏi mẹ - Tiết 1",""],[31,"Bài 4: Hỏi mẹ - Tiết 2","Tích hợp: LTCM"],[31,"Luyện tập tuần 31 - Tiết 1",""],[31,"Luyện tập tuần 31 - Tiết 2",""],[32,"Bài 5: Những cánh cò - Tiết 1",""],[32,"Bài 5: Những cánh cò - Tiết 2","Tích hợp: BVMT"],[32,"Bài 5: Những cánh cò - Tiết 3",""],[32,"Bài 5: Những cánh cò - Tiết 4",""],[32,"Bài 6: Buổi trưa hè - Tiết 1",""],[32,"Bài 6: Buổi trưa hè - Tiết 2","Tích hợp: BVMT"],[32,"Bài 7: Hoa phượng - Tiết 1",""],[32,"Bài 7: Hoa phượng - Tiết 2","Tích hợp: BVMT"],[32,"Ôn tập - Tiết 1",""],[32,"Ôn tập - Tiết 2","Tích hợp: NLS 1.1.CB1a"],[32,"Luyện tập tuần 32 - Tiết 1",""],[32,"Luyện tập tuần 32 - Tiết 2",""],[33,"Bài 1: Cậu bé thông minh - Tiết 1","Tích hợp: LTCM","ĐẤT NƯỚC VÀ CON NGƯỜI"],[33,"Bài 1: Cậu bé thông minh - Tiết 2","Tích hợp: QCN"],[33,"Bài 1: Cậu bé thông minh - Tiết 3",""],[33,"Bài 1: Cậu bé thông minh - Tiết 4","Tích hợp: QCN"],[33,"Bài 2: Lính cứu hỏa - Tiết 1",""],[33,"Bài 2: Lính cứu hỏa - Tiết 2","Tích hợp: QPAN, KNS"],[33,"Bài 2: Lính cứu hỏa - Tiết 3",""],[33,"Bài 2: Lính cứu hỏa - Tiết 4",""],[33,"Bài 3: Lớn lên bạn làm gì? - Tiết 1","Tích hợp: QCN"],[33,"Bài 3: Lớn lên bạn làm gì? - Tiết 2",""],[33,"Luyện tập tuần 33 - Tiết 1",""],[33,"Luyện tập tuần 33 - Tiết 2",""],[34,"Bài 4: Ruộng bậc thang ở Sa Pa - Tiết 1","Tích hợp: QPAN, BVMT"],[34,"Bài 4: Ruộng bậc thang ở Sa Pa - Tiết 2",""],[34,"Bài 5: Nhớ ơn - Tiết 1",""],[34,"Bài 5: Nhớ ơn - Tiết 2","Tích hợp: LTCM"],[34,"Bài 6: Du lịch biển Việt Nam - Tiết 1",""],[34,"Bài 6: Du lịch biển Việt Nam - Tiết 2","Tích hợp: QPAN, BVMT"],[34,"Bài 6: Du lịch biển Việt Nam - Tiết 3",""],[34,"Bài 6: Du lịch biển Việt Nam - Tiết 4",""],[34,"Ôn tập - Tiết 1",""],[34,"Ôn tập - Tiết 2",""],[34,"Luyện tập tuần 34 - Tiết 1",""],[34,"Luyện tập tuần 34 - Tiết 2",""],[35,"Bài 1 - Tiết 1","","ÔN TẬP VÀ ĐÁNH GIÁ"],[35,"Bài 1 - Tiết 2",""],[35,"Bài 2 - Tiết 1",""],[35,"Bài 2 - Tiết 2",""],[35,"Bài 3 - Tiết 1",""],[35,"Bài 3 - Tiết 2",""],[35,"Luyện tập tuần 35 - Tiết 1",""],[35,"Luyện tập tuần 35 - Tiết 2",""],[35,"Kiểm tra",""],[35,"Kiểm tra",""],[35,"Kiểm tra",""],[35,"Đánh giá cuối năm",""]]},"dd":{"ten":"Đạo đức 1","icon":"💗","kb":"Đạo đức","tu":["dd","dao duc"],"ds":[[1,"Bài 1: Em giữ sạch đôi tay","Tích hợp QCN","1. Tự chăm sóc bản thân"],[2,"Bài 2: Em giữ sạch răng miệng","Tích hợp QCN"],[3,"Bài 3: Em tắm, gội sạch sẽ","Tích hợp QCN, KNS"],[4,"Bài 4: Em giữ trang phục gọn gàng, sạch sẽ","Tích hợp QCN"],[5,"Bài 5: Gia đình của em - Tiết 1","Tích hợp QCN","2. Yêu thương gia đình"],[6,"Bài 5: Gia đình của em - Tiết 2","Tích hợp LTCM"],[7,"Bài 6: Lễ phép, vâng lời ông bà, cha mẹ, anh chị","Tích hợp LTCM","3. Quan tâm chăm sóc người thân trong gia đình"],[8,"Bài 7: Quan tâm, chăm sóc ông bà","Tích hợp LTCM"],[9,"Thực hành kĩ năng giữa Học kì 1",""],[10,"Bài 8: Quan tâm, chăm sóc cha mẹ","Tích hợp LTCM"],[11,"Bài 9: Chăm sóc, giúp đỡ em nhỏ","Tích hợp QCN"],[12,"Bài 10: Đi học đúng giờ","Tích hợp QCN","4. Thực hiện nội quy trường lớp"],[13,"Bài 11: Học bài và làm bài đầy đủ","Tích hợp LTCM"],[14,"Bài 12:Giữ trật tự trong trường, lớp","Tích hợp LTCM"],[15,"Bài 13: Giữ gìn tài sản của trường, lớp","Tích hợp QCN"],[16,"Bài 14: Giữ vệ sinh trường, lớp","Tích hợp BVMT","5.. Tự giác làm việc của mình"],[17,"Bài 15: Gọn gàng, ngăn nắp","Tích hợp LTCM"],[18,"Ôn tập - Đánh giá cuối HK 1",""],[19,"Bài 16: Học tập, sinh hoạt đúng giờ","Tích hợp QCN, NLS 5.2.CB1a"],[20,"Bài 17: Tự giác học tập","Tích hợp QCN, NLS 1.1.CB1a","6. Tự giác làm việc của mình"],[21,"Bài 18: Tự giác tham gia các hoạt động ở trường","Tích hợp LTCM"],[22,"Bài 19: Tự giác làm việc nhà","Tích hợp LTCM"],[23,"Bài 20: Không nói dối","Tích hợp QCN, NLS 2.3.CB1a","7. Thật thà"],[24,"Bài 21: Không tự ý lấy và sử dụng đồ của người khác","Tích hợp NLS 2.2.CB1a"],[25,"Bài 22: Nhặt được của rơi trả lại người đánh mất","Tích hợp LTCM"],[26,"Bài 23: Biết nhận lỗi","Tích hợp LTCM"],[27,"Thực hành kĩ năng giữa Học kì 2",""],[28,"Bài 24: Phòng, tránh tai nạn giao thông","Tích hợp KNS, QCN","8. Phòng tránh tai nạn thương tích"],[29,"Bài 25: Phòng, tránh đuối nước","Tích hợp KNS, QCN"],[30,"Bài 26: Phòng, tránh bỏng","Tích hợp KNS, QCN"],[31,"Bài 27: Phòng, tránh thương tích do ngã","Tích hợp QCN, KNS"],[32,"Bài 28: Phòng, tránh điện giật","Tích hợp Năng lực số 4.1 CB1b, QCN"],[33,"Bài 29: Phòng, tránh ngộ độc thực phẩm","Tích hợp Năng lực số 4.1 CB1b, QCN"],[34,"Bài 30: Phòng, tránh xâm hại","Tích hợp Năng lực số 4.1 CB1b, QCN"],[35,"Ôn tập - Đánh giá cuối HK 2",""]]},"tnxh":{"ten":"Tự nhiên và Xã hội 1","icon":"🌱","kb":"Tự nhiên và Xã hội","tu":["tnxh","tu nhien xa hoi","tu nhien va xa hoi"],"ds":[[1,"Kể về gia đình","Tích hợp QCN","Gia đình"],[1,"Kể về gia đình","Tích hợp QCN"],[2,"Ngôi nhà của em","Tích hợp QCN"],[2,"Ngôi nhà của em","Tích hợp QPAN, LTCM"],[3,"Đồ dùng trong nhà",""],[3,"Đồ dùng trong nhà","Tích hợp QPAN, QCN"],[4,"An toàn khi sử dụng đồ dùng trong nhà","Tích hợp NLS 4.1.CB1b"],[4,"An toàn khi sử dụng đồ dùng trong nhà","Tích hợp QCN; NLS 4.1.CB1b"],[5,"Ôn tập chủ đề Gia đình",""],[5,"Ôn tập chủ đề Gia đình",""],[6,"Ôn tập chủ đề Gia đình",""],[6,"Lớp học của em","Tích hợp QCN","Trường học"],[7,"Lớp học của em","Tích hợp QPAN, LTCM"],[7,"Lớp học của em",""],[8,"Cùng khám phá trường học",""],[8,"Cùng khám phá trường học","Tích hợp NLS 4.1.CB1b"],[9,"Cùng khám phá trường học","Tích hợp QCN"],[9,"Cùng vui ở trường","Tích hợp QCN"],[10,"Cùng vui ở trường",""],[10,"Ôn tập chủ đề Trường học",""],[11,"Ôn tập chủ đề Trường học",""],[11,"Ôn tập chủ đề Trường học",""],[12,"Cùng khám phá quang cảnh xung quanh","","Cộng đồng địa phương"],[12,"Cùng khám phá quang cảnh xung quanh","Tích hợp QCN"],[13,"Con người nơi em sống","Tích hợp QCN; NLS: 6.1.CB1a"],[13,"Con người nơi em sống",""],[14,"Vui đón Tết","Tích hợp QCN"],[14,"Vui đón Tết","Tích hợp QCN"],[15,"An toàn trên đường","Tích hợp NLS: 6.1.CB1a"],[15,"An toàn trên đường","Tích hợp QCN"],[16,"Ôn tập chủ đề Cộng đồng địa phương",""],[16,"Ôn tập chủ đề Cộng đồng địa phương",""],[17,"Ôn tập chủ đề Cộng đồng địa phương",""],[17,"Cây xung quanh em","","Thực vật và động vật"],[18,"Cây xung quanh em",""],[18,"Cây xung quanh em",""],[19,"Chăm sóc và bảo vệ cây trồng","Tích hợp QCN"],[19,"Chăm sóc và bảo vệ cây trồng","Tích hợp NLS 1.1.CB1a"],[20,"Chăm sóc và bảo vệ cây trồng",""],[20,"Con vật quanh em",""],[21,"Con vật quanh em",""],[21,"Con vật quanh em","Tích hợp QCN"],[22,"Chăm sóc và bảo vệ vật nuôi",""],[22,"Chăm sóc và bảo vệ vật nuôi",""],[23,"Ôn tập chủ đề Thực vật và Động vật",""],[23,"Ôn tập chủ đề Thực vật và Động vật","Tích hợp BVMT"],[24,"Ôn tập chủ đề Thực vật và Động vật",""],[24,"Cơ thể em","Tích hợp QCN; Tích hợp NLS: 4.3.CB1a","Con người và sức khỏe"],[25,"Cơ thể em","Tích hợp QCN"],[25,"Cơ thể em","Tích hợp QCN"],[26,"Các giác quan của cơ thể","Tích hợp NLS: 6.1.CB1a"],[26,"Các giác quan của cơ thể","Tích hợp NLS 4.1.CB1b"],[27,"Các giác quan của cơ thể","Tích hợp QCN"],[27,"Ăn, uống hằng ngày",""],[28,"Ăn, uống hằng ngày",""],[28,"Vận động và nghỉ ngơi","Tích hợp QCN"],[29,"Vận động và nghỉ ngơi","Tích hợp QCN"],[29,"Tự bảo vệ mình","Tích hợp NLS 4.1.CB1b"],[30,"Tự bảo vệ mình","Tích hợp QCN,QPAN"],[30,"Ôn tập chủ đề Con người và sức khỏe","Tích hợp KNS"],[31,"Ôn tập chủ đề Con người và sức khỏe","Tích hợp QCN"],[31,"Ôn tập chủ đề Con người và sức khỏe",""],[32,"Cùng khám phá bầu trời","Tích hợp KNS","Trái đất và bầu trời"],[32,"Cùng khám phá bầu trời",""],[33,"Cùng khám phá bầu trời","Năng lực số 2.1.CB1a"],[33,"Thời tiết luôn thay đổi","Tích hợp KNS"],[34,"Thời tiết luôn thay đổi","Tích hợp NLS 4.1.CB1b:"],[34,"Thời tiết luôn thay đổi","Tích hợp QCN"],[35,"Ôn tập chủ đề Trái đất và bầu trời","Tích hợp KNS"],[35,"Ôn tập chủ đề Trái đất và bầu trời","Tích hợp NLS 2.1.CB1a"]]},"hdtn":{"ten":"Hoạt động trải nghiệm 1","icon":"🎈","kb":"Hoạt động trải nghiệm","tu":["hdtn","trai nghiem","hd trai nghiem"],"ds":[[1,"Sinh hoạt dưới cờ: Lễ Khai giảng","","Chủ đề 1: Chào năm học mới"],[1,"Bài 1: Làm quen với bạn mới","Tích hợp QCN; NLS 2.3.CB1a"],[1,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[2,"Sinh hoạt dưới cờ: Tìm hiểu nội quy nhà trường",""],[2,"Bài 2: Những việc nên làm trong giờ học, giờ chơi","Tích hợp QCN, LTCM"],[2,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[3,"Sinh hoạt dưới cờ: Nói lời hay - làm việc tốt",""],[3,"Bài 2: Những việc nên làm trong giờ học, giờ chơi",""],[3,"Sinh hoạt lớp: Làm quen với sinh hoạt Sao Nhi đồng","Tích hợp QCN Tích hợp LTCM"],[4,"Sinh hoạt dưới cờ: Vui trung thu",""],[4,"Bài 2: Những việc nên làm trong giờ học, giờ chơi","Tích hợp QCN"],[4,"Sinh hoạt lớp: Vui trung thu",""],[5,"Sinh hoạt dưới cờ: Sao Nhi đồng chăm ngoan","","Chủ đề 2: Em biết yêu thương"],[5,"Bài 3: Cảm xúc của em","Tích hợp QCN"],[5,"Sinh hoạt lớp: Sơ kết tuần",""],[6,"Sinh hoạt dưới cờ: Hoạt động nhân đạo",""],[6,"Bài 4: Yêu thương con người",""],[6,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới","Tích hợp LTCM"],[7,"Sinh hoạt dưới cờ: Thử làm ca sĩ chào mừng ngày Phụ nữ Việt Nam 20-10",""],[7,"Bài 4: Yêu thương con người",""],[7,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới","Tích hợp LTCM"],[8,"Sinh hoạt dưới cờ: Tuyên dương tấm gương Nhi đồng chăm ngoan",""],[8,"Bài 4: Yêu thương con người","Tích hợp LTCM"],[8,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[9,"Sinh hoạt dưới cờ: Tìm hiểu truyền thống nhà trường","","Chủ đề 3: Truyền thống trường em"],[9,"Bài 5: Thân thiện với bạn bè",""],[9,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[10,"Sinh hoạt dưới cờ: Lễ Phát động thi đua thực hiện Năm điều Bác Hồ dạy.",""],[10,"Bài 6: Thực hiện Năm điều Bác Hồ dạy","Tích hợp LTCM"],[10,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới","Tích hợp LTCM"],[11,"Sinh hoạt dưới cờ: Chào mừng ngày Nhà giáo Việt Nam 20-11",""],[11,"Bài 7: Kính yêu thầy cô",""],[11,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới","Tích hợp QCN"],[12,"Sinh hoạt dưới cờ: Trưng bày và giới thiệu sản phẩm ở \"Góc tri ân\" thầy cô",""],[12,"Bài 7: Kính yêu thầy cô",""],[12,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[13,"Sinh hoạt dưới cờ: Tìm hiểu về quyền và bổn phận của trẻ em.","","Chủ đề 4: An toàn cho em"],[13,"Bài 8: An toàn khi vui chơi",""],[13,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[14,"Sinh hoạt dưới cờ: Chào mừng ngày thành lập QĐND Việt Nam 22-12",""],[14,"Bài 8: An toàn khi vui chơi",""],[14,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[15,"Sinh hoạt dưới cờ: Diễn đàn phòng chống bạo lực học đường",""],[15,"Bài 9: Phòng tránh bị bắt nạt","Tích hợp QCN; NLS 4.1.CB1b"],[15,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[16,"Sinh hoạt dưới cờ: An toàn cho nụ cười trẻ thơ",""],[16,"Bài 10: Sử dụng đồ dùng an toàn trong gia đình","Tích hợp NLS 2.1.CB1a"],[16,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[17,"Sinh hoạt dưới cờ: Giao lưu \"Nét đẹp tuổi thơ\"","","Chủ đề 5: Em quý trọng bản thân"],[17,"Bài 11: Chân dung của em","Tích hợp QCN; Tích hợp NLS 4.2.CB1a"],[17,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[18,"Sinh hoạt dưới cờ: Ngày hội vì sức khỏe học đường",""],[18,"Bài 12: Giữ vệ sinh cá nhân","Tích hợp NLS 2.1.CB1a"],[18,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[19,"Sinh hoạt dưới cờ: Vệ sinh an toàn thực phẩm",""],[19,"Bài 13: Ăn uống hợp lí","Tích hợp NLS 2.2.CB1a"],[19,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[20,"Sinh hoạt dưới cờ: Ngày hội trình diễn thời trang",""],[20,"Bài 14: Sử dụng trang phục hằng ngày",""],[20,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[21,"Sinh hoạt dưới cờ: Ủng hộ \" Tết yêu thương\"","","Chủ đề 6: Vui đón mùa xuân"],[21,"Bài 15: Sắp xếp nhà cửa gọn gàng đón Tết",""],[21,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[22,"Sinh hoạt dưới cờ: Hội chợ xuân",""],[22,"Bài 15: Sắp xếp nhà cửa gọn gàng đón Tết",""],[22,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[23,"Sinh hoạt dưới cờ: Giao lưu \"Đón Tết cổ truyền dân tộc\"",""],[23,"Bài 16: Ứng xử khi được nhận quà ngày Tết","Tích hợp LTCM"],[23,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[24,"Sinh hoạt dưới cờ: Vui chơi ngày Tết",""],[24,"Bài 16: Ứng xử khi được nhận quà ngày Tết","Tích hợp QCN"],[24,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[25,"Sinh hoạt dưới cờ: Trò chơi sinh hoạt cộng đồng","","Chủ đề 7: Tham gia hoạt động cộng đồng"],[25,"Bài 17: Hàng xóm nhà em","Tích hợp LTCM"],[25,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[26,"Sinh hoạt dưới cờ: Chào mừng ngày Quốc tế Phụ nữ 8-3",""],[26,"Bài 17: Hàng xóm nhà em","Tích hợp LTCM"],[26,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[27,"Sinh hoạt dưới cờ: Em làm kế hoạch nhỏ",""],[27,"Bài 18: Em tham gia các hoạt động xã hội","Tích hợp LTCM"],[27,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới",""],[28,"Sinh hoạt dưới cờ: Lễ phát động phong trào Tuổi nhỏ làm việc nhỏ \"Nuôi heo đất - Giúp bạn đến trường\"",""],[28,"Bài 18: Em tham gia các hoạt động xã hội","Tích hợp LTCM"],[28,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[29,"Sinh hoạt dưới cờ: Chăm sóc vườn cây nhà trường","Tích hợp BVMT","Chủ đề 8: Quê hương tươi đẹp"],[29,"Bài 19: Thiên nhiên tươi đẹp quê em","Tích hợp BVMT"],[29,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới","Tích hợp BVMT"],[30,"Sinh hoạt dưới cờ: Em tập làm hướng dẫn viên du lịch",""],[30,"Bài 19: Thiên nhiên tươi đẹp quê em","Tích hợp: NLS 1.1.CB1a"],[30,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới",""],[31,"Sinh hoạt dưới cờ: Hát ca ngợi cảnh đẹp quê hương","Tích hợp BVMT"],[31,"Bài 20: Em bảo vệ cảnh quan thiên nhiên","Tích hợp BVMT; Tích hợp NLS 3.1.CB1a"],[31,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới","Tích hợp BVMT"],[32,"Sinh hoạt dưới cờ: Ngày hội sách trường em",""],[32,"Bài 20: Em bảo vệ cảnh quan thiên nhiên","Tích hợp BVMT"],[32,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới","Tích hợp BVMT"],[33,"Sinh hoạt dưới cờ: Thân thiện với môi trường","Tích hợp BVMT","Chủ đề 9: Em bảo vệ môi trường"],[33,"Bài 21: Giữ gìn môi trường sạch, đẹp","Tích hợp BVMT"],[33,"Sinh hoạt lớp: Sơ kết tuần, lập kế hoạch tuần tới","Tích hợp BVMT"],[34,"Sinh hoạt dưới cờ: Mừng Sinh nhật Bác Hồ, mừng Đội ta trưởng thành","Tích hợp BVMT"],[34,"Bài 21: Giữ gìn môi trường sạch, đẹp","Tích hợp BVMT"],[34,"Sinh hoạt sao: Sơ kết tuần, lập kế hoạch tuần tới","Tích hợp BVMT"],[35,"Sinh hoạt dưới cờ: Lễ Tổng kết năm học",""],[35,"Bài 21: Giữ gìn môi trường sạch, đẹp","Tích hợp BVMT"],[35,"Sinh hoạt lớp: Tổng kết năm học","Tích hợp BVMT"]]}}; /* Phụ lục KHDH lớp 1 của trường 2026–2027: ds = [tuần, tên tiết, ghi chú tích hợp, chủ đề (chỉ ghi khi đổi)] — Toán đã có ở PPCT nên không lặp lại */
+Object.values(PPCT_MON).forEach(M=>{let c="";M.cd=M.ds.map(r=>(c=r[3]||c));});
+/* Phụ lục «Lồng ghép giáo dục AI» lớp 1 của trường (mã YCCĐ đúng như phụ lục) — khoá: từ khoá tên bài (không dấu) */
+const LONG_GHEP_AI = [
+  {mon:"Toán", bai:"Khối lập phương, khối hộp chữ nhật; Vị trí, định hướng trong không gian", khoa:["khoi lap phuong","khoi hop chu nhat","vi tri dinh huong"], ma:["1.D2.1","1.D2.2"], yc:"Nhận biết được rằng có loại máy thông minh chỉ làm được một việc, có loại có thể làm nhiều việc khác nhau; xếp được một số máy thông minh vào hai nhóm: nhóm chỉ làm được một việc và nhóm làm được nhiều việc khác nhau."},
+  {mon:"Đạo đức", bai:"Bài 5: Gia đình của em", khoa:["gia dinh cua em"], ma:["1.A1.3","1.A1.4"], yc:"Nêu được rằng việc AI thể hiện cảm xúc là do con người lập trình hoặc thiết kế trước; nêu được ví dụ minh họa và giải thích được rằng những biểu hiện này chỉ là phản ứng được lập trình sẵn."},
+  {mon:"Đạo đức", bai:"Bài 20: Không nói dối; Bài 21: Không tự ý lấy và sử dụng đồ của người khác", khoa:["khong noi doi","khong tu y lay"], ma:["1.B3.1","1.B3.2"], yc:"Nhận biết được rằng không được phép sử dụng AI với mục đích làm hại người khác; nêu được ví dụ về việc con người sử dụng AI đúng cách, vì mục đích tốt đẹp."},
+  {mon:"Tiếng Việt", bai:"Chủ đề Mái ấm gia đình – Bài 1: Nụ hôn trên bàn tay", khoa:["nu hon tren ban tay"], ma:["1.A2.1","1.A2.MR1"], yc:"Nêu được các cách mà AI thể hiện cảm xúc qua hình ảnh, giọng nói hoặc hành vi; nêu được rằng những biểu hiện này giúp AI giao tiếp tự nhiên hơn với con người."},
+  {mon:"Hoạt động trải nghiệm", bai:"Chủ đề 2 – Bài 3: Cảm xúc của em", khoa:["cam xuc cua em"], ma:["1.A1.1","1.A1.2"], yc:"Nêu được ví dụ về một số cảm xúc quen thuộc của con người và bước đầu nhận ra rằng con người có cảm xúc còn AI thì không; AI có thể mô phỏng hoặc nhận diện cảm xúc, chứ không trải nghiệm cảm xúc như con người."},
+  {mon:"Hoạt động trải nghiệm", bai:"Chủ đề 4 – Bài 9: Phòng tránh bị bắt nạt", khoa:["phong tranh bi bat nat","bat nat"], ma:["1.B1.1"], yc:"Nêu được một số hành vi sử dụng AI có thể gây hại cho người khác."},
+  {mon:"Tự nhiên và Xã hội", bai:"Bài 3: Đồ dùng trong nhà; Bài 4: An toàn khi sử dụng đồ dùng trong nhà", khoa:["do dung trong nha"], ma:["1.A2.2","1.A2.3"], yc:"Nhận biết và kể tên được một số sản phẩm, thiết bị có sử dụng AI (loa thông minh, trợ lí ảo, robot hút bụi, camera nhận diện khuôn mặt…); mô tả được công dụng chính và cách AI giúp sản phẩm hoạt động thông minh hơn."},
+  {mon:"Tự nhiên và Xã hội", bai:"Các giác quan của cơ thể", khoa:["cac giac quan"], ma:["1.C1.1","1.C1.2"], yc:"Nhận biết được AI trong một số ví dụ cụ thể, đơn giản; nhận diện được một số công cụ AI quen thuộc trên điện thoại hoặc máy tính bảng."},
+  {mon:"Tự nhiên và Xã hội", bai:"Cơ thể em", khoa:["co the em"], ma:["1.C1.3","1.C1.4","1.C1.MR1","1.C1.MR2"], yc:"Nhận biết được thiết bị thông minh có bộ phận giống con người (camera là «mắt», micro là «tai»); AI hiểu mệnh lệnh đơn giản, trò chuyện theo kịch bản; xử lí hình ảnh để nhận diện đồ vật, xử lí âm thanh để phân biệt âm thanh."},
+  {mon:"Tự nhiên và Xã hội", bai:"Cây xung quanh em; Con vật quanh em", khoa:["cay xung quanh em","con vat quanh em"], ma:["1.D1.1","1.D1.MR1"], yc:"Nêu được ví dụ về tình huống AI «học» từ hình ảnh, thông tin do con người cung cấp; biết rằng để AI trả lời đúng cần có nhiều ví dụ đúng và khác nhau."}
+];
+function timLongGhep(ten){const b=" "+boDau(ten).replace(/[^a-z0-9]+/g," ")+" ";return LONG_GHEP_AI.filter(x=>x.khoa.some(k=>b.includes(" "+k+" ")||b.includes(k)));}
+
+/* Ví dụ huấn luyện nền cho AI xếp ngăn (từ khoá nghề giáo, không chứa dữ liệu ai) */
+const VI_DU_NEN = {
+  ga:["giáo án toán bài","kế hoạch bài dạy tiết","khbd tuần","giáo án tiếng việt bài","giáo án điện tử bài","soạn bài tiết","bài soạn hoạt động trải nghiệm"],
+  pht:["phiếu học tập bài","phiếu bài tập cuối tuần","phiếu luyện tập","phiếu ôn tập","bài tập về nhà","phiếu tô màu đếm số"],
+  de:["đề kiểm tra cuối học kì","đề kiểm tra định kì","ma trận đề kiểm tra","đáp án hướng dẫn chấm","đề ôn thi","bản đặc tả đề kiểm tra","đề khảo sát đầu năm"],
+  vb:["công văn hướng dẫn nhiệm vụ năm học","thông tư đánh giá học sinh","quyết định của ubnd xã","văn bản chỉ đạo của sở","hướng dẫn chuyên môn","kế hoạch năm học của trường văn bản"],
+  mc:["minh chứng bồi dưỡng thường xuyên","giấy chứng nhận","giấy khen","ảnh hoạt động minh chứng","minh chứng chuẩn nghề nghiệp","bài thu hoạch bdtx"],
+  kh:["biên bản sinh hoạt chuyên môn","biên bản họp tổ","kế hoạch tổ khối","kế hoạch cá nhân","báo cáo sơ kết","biên bản họp phụ huynh","kế hoạch chủ nhiệm"],
+  tl:["slide bài giảng","video bài hát","hình ảnh minh hoạ","powerpoint trò chơi","tranh ảnh","file âm thanh đọc mẫu","bộ thẻ chữ"],
+  khac:["danh bạ","mật khẩu wifi phòng máy","lịch trực","thời khoá biểu","ghi chú cá nhân"]
+};
+const VIET_TAT = {ga:"giao an", gadt:"giao an dien tu", khbd:"ke hoach bai day", kt:"kiem tra", ktdk:"kiem tra dinh ki", pht:"phieu hoc tap", bb:"bien ban", cv:"cong van", tt:"thong tu", qd:"quyet dinh", shcm:"sinh hoat chuyen mon", bdtx:"boi duong thuong xuyen", hk1:"hoc ki 1", hk2:"hoc ki 2", hki:"hoc ki 1", hkii:"hoc ki 2", tv:"tieng viet", tn:"trai nghiem", hdtn:"hoat dong trai nghiem", ppt:"powerpoint slide", mc:"minh chung", ph:"phu huynh", gv:"giao vien", hs:"hoc sinh", tkb:"thoi khoa bieu"};
+
+/* ================= TRẠNG THÁI ================= */
+const HOM_NAY = new Date();
+function iso(d){const z=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate());}
+function congNgay(n){const d=new Date(HOM_NAY);d.setDate(d.getDate()+n);return iso(d);}
+function duLieuMau(){
+  const mau=(ten,ngan,noi,duong,nhan,bai)=>({id:"m"+Math.random().toString(36).slice(2,9),ten,ngan,noi,duong,nhan,bai:bai??"",ngay:iso(HOM_NAY),mau:true});
+  return {
+    ver:1, gv:{ten:"Thầy Trần Hữu Hạnh", truong:"Trường TH & THCS Đa Phước"}, saoLuu:null,
+    docs:[
+      mau("KHBD Toán 1 – Bài 4: So sánh số (4 tiết)","ga","drive","Drive › Toán 1 › HK1 › KHBD",["toán","lớp 1"],4),
+      mau("KHBD Toán 1 – Bài 5: Mấy và mấy","ga","drive","Drive › Toán 1 › HK1 › KHBD",["toán","lớp 1"],5),
+      mau("Phiếu học tập Bài 5 – Mấy và mấy (tách gộp số)","pht","may","D: › Day hoc › Toan 1 › Phieu",["toán","phiếu"],5),
+      mau("Slide trò chơi Ai nhanh hơn – So sánh số","tl","may","D: › Day hoc › Toan 1 › Slide",["toán","trò chơi"],4),
+      mau("Ma trận + đề kiểm tra cuối HK1 Toán 1 (bản nháp)","de","drive","Drive › Toán 1 › Kiểm tra",["toán","HK1"],""),
+      mau("Biên bản sinh hoạt chuyên môn tổ khối 1 – tháng 9","kh","tu","Tủ hồ sơ tổ · ngăn 2",["tổ khối 1","SHCM"],""),
+      mau("Kế hoạch dạy học tăng cường Toán 1, Tiếng Việt 1","kh","drive","Drive › Kế hoạch › 2026-2027",["tăng cường"],""),
+      mau("Hướng dẫn nhiệm vụ năm học 2026–2027 (văn bản của trường)","vb","zalo","Zalo nhóm Hội đồng sư phạm",["văn bản","năm học"],""),
+      mau("Bài thu hoạch bồi dưỡng thường xuyên – học kì 1","mc","drive","Drive › Minh chứng › BDTX",["BDTX","minh chứng"],""),
+      mau("Phiếu tô màu đếm số 6 – 10","pht","dt","Điện thoại › Ảnh › Album Toán 1",["toán","phiếu"],2)
+    ],
+    lop:[{ten:"1A",siso:29},{ten:"1B",siso:29},{ten:"1C",siso:29},{ten:"1D",siso:28}],
+    ghiChuHs:{}, bai:{0:2,1:2,2:2,3:2,4:1,5:1},
+    viec:[
+      {id:"v1",ten:"Nộp hồ sơ dự thi Giải thưởng Tiên phong AI 2026",han:"2026-10-25",xong:false},
+      {id:"v2",ten:"Sao lưu Sổ tay vàng (thứ Sáu)",han:congNgay((5-HOM_NAY.getDay()+7)%7),xong:false,mau:true},
+      {id:"v3",ten:"Hoàn thành KHBD Toán 1 – Bài 6 Luyện tập chung",han:congNgay(2),xong:false,mau:true},
+      {id:"v4",ten:"Chuẩn bị nội dung sinh hoạt tổ khối 1",han:congNgay(4),xong:false,mau:true}
+    ],
+    doLog:[], doSoTay:false
+  };
+}
+let S;
+function tai(){try{const t=localStorage.getItem(KHOA); S=t?JSON.parse(t):duLieuMau();}catch(e){S=duLieuMau();} nangCap();}
+function nangCap(){ /* v1 → v2: trạng thái theo từng tiết PPCT, ngày tuần 1, họ tên, tổ */
+  if(!S.tiet){S.tiet={};PPCT.forEach((p,i)=>{const v=(S.bai||{})[p[2]];if(v)S.tiet[i+1]=v;});}
+  if(!S.tuan1)S.tuan1="2026-09-07";
+  if(!S.tietMon)S.tietMon={}; Object.keys(PPCT_MON).forEach(m=>{if(!S.tietMon[m])S.tietMon[m]={};}); /* v3: tiến độ các môn theo phụ lục KHDH */
+  S.gv=S.gv||{}; if(!S.gv.hoTen)S.gv.hoTen="Trần Hữu Hạnh"; if(!S.gv.to)S.gv.to="1"; if(!S.gv.truongDu)S.gv.truongDu="Trường Tiểu học và Trung học cơ sở Đa Phước";
+  S.ver=2;
+}
+function luu(){try{localStorage.setItem(KHOA,JSON.stringify(S));}catch(e){}}
+tai();
+
+/* ================= TIỆN ÍCH ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function boDau(s){return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase();}
+function tach(s){return boDau(s).replace(/[^a-z0-9]+/g," ").trim().split(/\s+/).filter(Boolean);}
+function moRong(tokens){const r=[];tokens.forEach(t=>{if(VIET_TAT[t])r.push(...VIET_TAT[t].split(" "));else r.push(t);});return r;}
+function ngan(id){return NGAN.find(n=>n.id===id)||NGAN[NGAN.length-1];}
+function fmtNgay(s){if(!s)return"";const [y,m,d]=s.split("-");return d+"/"+m+"/"+y;}
+function giay(x){return x.toFixed(1).replace(".",",");}
+let am; function ting(tot=true){try{am=am||new (window.AudioContext||window.webkitAudioContext)();const o=am.createOscillator(),g=am.createGain();o.type="sine";o.frequency.value=tot?880:220;g.gain.setValueAtTime(.0001,am.currentTime);g.gain.exponentialRampToValueAtTime(.18,am.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,am.currentTime+(tot?.35:.25));o.connect(g).connect(am.destination);o.start();o.stop(am.currentTime+.4);if(tot){const o2=am.createOscillator(),g2=am.createGain();o2.frequency.value=1320;g2.gain.setValueAtTime(.0001,am.currentTime+.08);g2.gain.exponentialRampToValueAtTime(.12,am.currentTime+.1);g2.gain.exponentialRampToValueAtTime(.0001,am.currentTime+.45);o2.connect(g2).connect(am.destination);o2.start(am.currentTime+.08);o2.stop(am.currentTime+.5);}}catch(e){}}
+let toastHen,toastHoanTac=null;
+function bao(chu,hoanTac){$("#toastChu").textContent=chu;toastHoanTac=hoanTac||null;$("#toastNut").style.display=hoanTac?"":"none";$("#toast").classList.add("hien");clearTimeout(toastHen);toastHen=setTimeout(()=>$("#toast").classList.remove("hien"),hoanTac?6000:3200);}
+$("#toastNut").onclick=()=>{if(toastHoanTac){toastHoanTac();toastHoanTac=null;}$("#toast").classList.remove("hien");};
+/* pháo giấy */
+function phaoGiay(){if(CHUP)return;const c=$("#phao"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;const ds=[...Array(90)].map(()=>({x:innerWidth/2,y:innerHeight*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*13-4,r:Math.random()*6+3,m:["#F59E0B","#6366F1","#10B981","#EC4899","#FDE68A"][Math.random()*5|0],g:Math.random()*6}));let k=0;(function ve(){x.clearRect(0,0,c.width,c.height);ds.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.45;p.g+=.2;x.save();x.translate(p.x,p.y);x.rotate(p.g);x.fillStyle=p.m;x.fillRect(-p.r,-p.r/2,p.r*2,p.r);x.restore();});if(++k<90)requestAnimationFrame(ve);else x.clearRect(0,0,c.width,c.height);})();}
+
+/* ================= SOÁT THÔNG TIN RIÊNG ================= */
+const CHU_HOA_VIET="A-ZÀ-ỸĐ";
+function soatRieng(s){
+  const loi=[]; s=String(s||"");
+  if(/(\+?84|0)\d{2}[\s.]?\d{3}[\s.]?\d{3,4}\b/.test(s)) loi.push("có dãy giống số điện thoại");
+  if(/\b\d{1,2}[\/\-.]\d{1,2}[\/\-.](19|20)\d{2}\b/.test(s) && /sinh|ns\b|ngay sinh/i.test(boDau(s))) loi.push("có ngày sinh");
+  const re=new RegExp("(?:^|[^"+CHU_HOA_VIET+"a-zà-ỹđ])((?:["+CHU_HOA_VIET+"][a-zà-ỹđ]+[ \\t]+){2,3}["+CHU_HOA_VIET+"][a-zà-ỹđ]+)","g");
+  const HO=["Nguyễn","Trần","Lê","Phạm","Huỳnh","Hoàng","Phan","Vũ","Võ","Đặng","Bùi","Đỗ","Hồ","Ngô","Dương","Lý","Châu","Thái","Lâm","Đinh","Trương","Mai","Tô","Hà","Tạ","Lưu","Cao","Kiều"];
+  let m; while((m=re.exec(s))){const tu=m[1].trim().split(/\s+/); if(HO.includes(tu[0]) && !/Hữu Hạnh/.test(m[1])) {loi.push("có cụm giống họ tên người («"+m[1].trim()+"») — thay bằng mã HS");}}
+  if(/\b(bệnh|dị ứng|hen suyễn|động kinh|khuyết tật)\b/i.test(s)) loi.push("có thông tin sức khoẻ — không đưa vào AI");
+  return [...new Set(loi)];
+}
+
+/* ================= AI XẾP NGĂN: NAIVE BAYES TRÊN MÁY ================= */
+function dacTrung(ten){const t=moRong(tach(ten)).filter(x=>x.length>1||/\d/.test(x));const f=[...t];for(let i=0;i<t.length-1;i++)f.push(t[i]+"_"+t[i+1]);return f;}
+let MO_HINH=null;
+function hocLai(){
+  const dem={},tong={},soMau={};let n=0;const tuVung=new Set();
+  const them=(ten,c)=>{n++;soMau[c]=(soMau[c]||0)+1;dem[c]=dem[c]||{};dacTrung(ten).forEach(f=>{dem[c][f]=(dem[c][f]||0)+1;tong[c]=(tong[c]||0)+1;tuVung.add(f);});};
+  Object.entries(VI_DU_NEN).forEach(([c,ds])=>ds.forEach(t=>them(t,c)));
+  S.docs.forEach(d=>{them(d.ten,d.ngan);them(d.ten,d.ngan);}); /* ví dụ của thầy nặng gấp đôi */
+  MO_HINH={dem,tong,soMau,n,V:tuVung.size};
+  const sv=$("#soViDu"); if(sv) sv.textContent=n;
+}
+function duDoan(ten){
+  if(!MO_HINH)hocLai(); const f=dacTrung(ten); if(!f.length) return [];
+  const {dem,tong,soMau,n,V}=MO_HINH; const diem=NGAN.map(g=>{const c=g.id;let lp=Math.log(((soMau[c]||0)+1)/(n+NGAN.length));f.forEach(x=>{lp+=Math.log((((dem[c]||{})[x]||0)+.5)/((tong[c]||0)+.5*V));});return {id:c,lp};});
+  const mx=Math.max(...diem.map(d=>d.lp)); const T=Math.max(1.5,f.length/2); /* làm mềm độ tự tin để hiện % trung thực hơn */ const e=diem.map(d=>({id:d.id,p:Math.exp((d.lp-mx)/T)})); const s=e.reduce((a,b)=>a+b.p,0);
+  return e.map(d=>({id:d.id,p:d.p/s})).sort((a,b)=>b.p-a.p);
+}
+function goiYNhan(ten){
+  const b=boDau(ten),r=[];
+  if(/toan/.test(b))r.push("toán"); if(/tieng viet|\btv\b/.test(b))r.push("tiếng việt"); if(/lop ?1|\b1[a-d]\b/.test(b))r.push("lớp 1");
+  if(/hk ?1|hoc ki 1|hki\b|giua ki 1|cuoi ki 1/.test(b))r.push("HK1"); if(/hk ?2|hoc ki 2|hkii/.test(b))r.push("HK2");
+  if(/tang cuong/.test(b))r.push("tăng cường"); if(/to khoi|shcm|sinh hoat chuyen mon/.test(b))r.push("tổ khối 1"); if(/tro choi/.test(b))r.push("trò chơi");
+  return r;
+}
+function doanBai(ten){const b=boDau(ten);const m=b.match(/bai\s*(\d{1,2})/);if(m&&+m[1]<DS_BAI.length)return +m[1];
+  let tot=-1,diem=0;DS_BAI.forEach(x=>{if(/luyen tap chung|on tap chung/.test(boDau(x.ten)))return;const t=tach(x.ten).filter(w=>w.length>2);if(!t.length)return;const k=t.filter(w=>b.includes(w)).length/t.length;if(k>diem&&k>=.75){diem=k;tot=x.so;}});return tot>=0?tot:"";}
+
+/* ================= TÌM KIẾM THÔNG MINH ================= */
+function lev(a,b){if(Math.abs(a.length-b.length)>1)return 9;const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t;}}return d[b.length];}
+function donVi(q){ /* gom «bài 5» thành cụm; viết tắt thành cụm từ đầy đủ */
+  const t=tach(q),u=[];for(let i=0;i<t.length;i++){const x=t[i];
+    if(x==="bai"&&/^\d+$/.test(t[i+1]||"")){u.push("bai "+t[++i]);continue;}
+    const b=x.match(/^bai(\d+)$/); if(b){u.push("bai "+b[1]);continue;}
+    u.push(VIET_TAT[x]||x);}
+  return u;
+}
+function khop(q,truong){ /* truong: [[chuoi,trongSo]] — mọi cụm phải khớp */
+  const us=donVi(q); if(!us.length) return 0; let tong=0;
+  const kho=truong.map(([s,w])=>({s:" "+moRong(tach(s)).join(" ")+" ",t:moRong(tach(s)),w}));
+  for(const u of us){let tot=0;
+    kho.forEach(({s,t,w})=>{let d=0;
+      if(u.includes(" ")){if(s.includes(" "+u+" "))d=3*u.split(" ").length;}
+      else t.forEach(y=>{let e=0;if(y===u)e=3;else if(/^\d+$/.test(u))e=0;else if(y.startsWith(u)&&u.length>=2)e=2;else if(u.length>=4&&lev(u,y)<=1)e=1.5;if(e>d)d=e;});
+      if(d*w>tot)tot=d*w;});
+    if(!tot)return 0; tong+=tot;}
+  return tong;
+}
+function timTatCa(q){
+  const kq=[];
+  S.docs.forEach(d=>{const s=khop(q,[[d.ten,2],[d.nhan.join(" "),1.5],[ngan(d.ngan).ten,1],[d.duong,1],[NOI[d.noi],.8],[d.bai!==""?("bai "+d.bai+" "+DS_BAI[d.bai].ten):"",1]]);if(s)kq.push({loai:"tl",s,d});});
+  DS_BAI.forEach(b=>{const s=khop(q,[["bài "+b.so+" "+b.ten,1.6],[b.cd,.8],["toán khbd giáo án",.5]]);if(s)kq.push({loai:"bai",s,d:b});});
+  const bq=boDau(q), mt=bq.match(/tiet\s*(\d{1,3})/), mw=bq.match(/tuan\s*(\d{1,2})/);
+  const bqs=" "+bq.replace(/\s+/g," ").trim()+" ";
+  const monQ=Object.keys(PPCT_MON).find(m=>PPCT_MON[m].tu.some(w=>bqs.includes(" "+w+" ")));
+  if(mt&&!monQ){const t=+mt[1];if(t>=1&&t<=PPCT.length)kq.push({loai:"bai",s:20,d:{tiet:t}});}
+  if(mt&&monQ){const t=+mt[1];if(t>=1&&t<=PPCT_MON[monQ].ds.length)kq.push({loai:"bai",s:21,d:{mon:monQ,tiet:t}});}
+  if(mw&&!monQ){const w=+mw[1];PPCT.forEach((p,i)=>{if(p[0]===w)kq.push({loai:"bai",s:19-i/200,d:{tiet:i+1}});});}
+  if(mw)Object.keys(PPCT_MON).forEach(m=>{if(monQ&&m!==monQ)return;PPCT_MON[m].ds.forEach((r,i)=>{if(r[0]===+mw[1])kq.push({loai:"bai",s:18.5-i/1000,d:{mon:m,tiet:i+1}});});});
+  if(!mt&&!mw){const daCo=new Set();Object.keys(PPCT_MON).forEach(m=>{const M=PPCT_MON[m];M.ds.forEach((r,i)=>{const g=tenGoc(r[1]),k=m+"|"+g;if(daCo.has(k))return;
+    const s=khop(q,[[g,1.4],[M.cd[i],.6],[M.ten+" "+M.tu.join(" "),.5],[r[2],.4]]);if(s){daCo.add(k);kq.push({loai:"bai",s,d:{mon:m,tiet:i+1}});}});});}
+  S.viec.forEach(v=>{const s=khop(q,[[v.ten,1.6],["công việc việc cần làm",.5]]);if(s)kq.push({loai:"viec",s,d:v});});
+  S.lop.forEach(l=>{const s=khop(q,[["lớp "+l.ten+" "+l.ten,1.6]]);if(s)kq.push({loai:"lop",s,d:l});
+    const qq=boDau(q).replace(/\s/g,""); const m=qq.match(/hs0*(\d{1,2})/); if(m){const so=+m[1];if(so>=1&&so<=l.siso)kq.push({loai:"hs",s:2.5,d:{lop:l.ten,ma:maHs(so)}});}});
+  return kq.sort((a,b)=>b.s-a.s);
+}
+function toSang(chu,q){let r=esc(chu);const qt=moRong(tach(q)).filter(t=>t.length>=2);if(!qt.length)return r;
+  const goc=chu;const bd=boDau(goc);const cho=[];qt.forEach(t=>{let i=-1;while((i=bd.indexOf(t,i+1))>=0){cho.push([i,i+t.length]);}});
+  if(!cho.length)return r;cho.sort((a,b)=>a[0]-b[0]);const gop=[];cho.forEach(c=>{const l=gop[gop.length-1];if(l&&c[0]<=l[1])l[1]=Math.max(l[1],c[1]);else gop.push([...c]);});
+  let out="",p=0;gop.forEach(([a,b])=>{out+=esc(goc.slice(p,a))+"<mark>"+esc(goc.slice(a,b))+"</mark>";p=b;});return out+esc(goc.slice(p));}
+function maHs(n){return "HS"+String(n).padStart(2,"0");}
+
+/* ================= ĐIỀU HƯỚNG ================= */
+let CHUP=false, manDang="tong-quan";
+function di(man){
+  manDang=man; $$(".man").forEach(m=>m.classList.toggle("dang",m.id==="man-"+man)); $$(".muc").forEach(m=>m.classList.toggle("dang",m.dataset.man===man));
+  VE[man]&&VE[man](); if(!CHUP) scrollTo({top:0,behavior:"smooth"});
+}
+$$(".muc").forEach(m=>m.onclick=()=>{location.hash=m.dataset.man;});
+document.addEventListener("click",e=>{const t=e.target.closest("[data-di]");if(t){location.hash=t.dataset.di;}const d=e.target.closest("[data-dong]");if(d){d.closest(".lop-phu").classList.remove("mo");}});
+$$(".lop-phu").forEach(l=>l.addEventListener("click",e=>{if(e.target===l)l.classList.remove("mo");}));
+
+/* ================= VẼ TỪNG MÀN ================= */
+const VE={};
+VE["tong-quan"]=()=>{
+  const thu=["Chủ nhật","Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy"][HOM_NAY.getDay()];
+  $("#loiChao").textContent="Chào mừng "+S.gv.ten+"! 👋";
+  $("#ngayNay").textContent="Hôm nay là "+thu+", ngày "+HOM_NAY.getDate()+" tháng "+(HOM_NAY.getMonth()+1)+", "+HOM_NAY.getFullYear()+" · "+S.gv.truong;
+  const meo=["Bấm 🏫 KHBD theo mẫu trường: lập khung đúng mẫu, soát lỗi trước khi nộp tổ.","Gõ «tiet 46» hoặc «tuan 16» là ra đúng tiết trong PPCT của trường.","Gõ «pht bai 5» là ra phiếu học tập bài 5 — không cần dấu.","Thêm tài liệu mới, AI tự đoán ngăn; thầy chỉ cần bấm Lưu.","Thứ Sáu bấm Sao lưu, cất file vào Drive là yên tâm.","Đo thử 10 lượt tìm tài liệu ở màn Đo hiệu quả để có số liệu thật."];
+  $("#meoNgay").textContent=meo[HOM_NAY.getDate()%meo.length];
+  const lau=!S.saoLuu||(Date.now()-new Date(S.saoLuu).getTime())>7*864e5; $("#bao-sao-luu").style.display=lau?"flex":"none";
+  const hs=S.lop.reduce((a,l)=>a+(+l.siso||0),0), daDay=Object.values(S.tiet).filter(v=>v===2).length, viecNay=S.viec.filter(v=>!v.xong&&v.han<=congNgay(0)).length;
+  const k=[["🗂️",S.docs.length,"Tài liệu đã xếp ngăn","#EEF2FF"],["👧",hs,"Học sinh · "+S.lop.length+" lớp (mã HS)","#ECFDF5"],["📘",daDay+"/"+PPCT.length,"Tiết Toán 1 đã dạy (PPCT)","#FEF3C7"],["⏰",viecNay,"Việc đến hạn hôm nay","#FEE2E2"]];
+  $("#kpi").innerHTML=k.map(x=>`<div class="the kpi"><span class="bieu" style="background:${x[3]}">${x[0]}</span><div class="so">${x[1]}</div><div class="ten">${x[2]}</div></div>`).join("");
+  veKeSach(); veNgay7("#ngay7a");
+  const sap=S.viec.filter(v=>!v.xong).sort((a,b)=>a.han.localeCompare(b.han)).slice(0,4);
+  $("#viecSap").innerHTML=sap.length?sap.map(dongViec).join(""):`<div class="trong">Không còn việc nào 🎉</div>`;
+  const gd=[...S.docs].slice(-4).reverse(); $("#ganDay").innerHTML=gd.length?gd.map(d=>dongTL(d)).join(""):`<div class="trong">Chưa có tài liệu — bấm «＋ Thêm tài liệu».</div>`;
+};
+function veKeSach(){
+  const W=560,H=210,w=W/NGAN.length; let s=`<svg viewBox="0 0 ${W} ${H+30}" role="img" aria-label="Kệ sách số theo ngăn">`;
+  s+=`<rect x="0" y="${H}" width="${W}" height="14" rx="4" fill="#B45309"/><rect x="0" y="${H+10}" width="${W}" height="8" fill="#92400E"/>`;
+  const mx=Math.max(1,...NGAN.map(n=>S.docs.filter(d=>d.ngan===n.id).length));
+  NGAN.forEach((n,i)=>{const so=S.docs.filter(d=>d.ngan===n.id).length;const h=70+110*(so/mx);const x=i*w+6;
+    s+=`<g style="cursor:pointer" data-ngan="${n.id}"><rect x="${x}" y="${H-h}" width="${w-12}" height="${h}" rx="6" fill="${n.mau}" filter="url(#bong)"/><rect x="${x+4}" y="${H-h+10}" width="${w-20}" height="5" rx="2" fill="rgba(255,255,255,.55)"/><rect x="${x+4}" y="${H-18}" width="${w-20}" height="5" rx="2" fill="rgba(255,255,255,.55)"/>
+    <text x="${x+(w-12)/2}" y="${H-h+38}" text-anchor="middle" font-size="22">${n.to}</text><text x="${x+(w-12)/2}" y="${H-h+66}" text-anchor="middle" font-size="20" font-weight="800" fill="#fff">${so}</text>
+    <text x="${x+(w-12)/2}" y="${H+28}" text-anchor="middle" font-size="10.5" fill="#1E1B4B" font-family="Segoe UI,Arial">${esc(n.ten.split(" ")[0]+(n.ten.split(" ")[1]&&n.ten.split(" ")[1].length<5?" "+n.ten.split(" ")[1]:""))}</text></g>`;});
+  $("#keSach").innerHTML=s+"</svg>";
+  $$("#keSach [data-ngan]").forEach(g=>g.onclick=()=>{nganLoc=g.dataset.ngan;location.hash="kho";});
+}
+function dongTL(d,q){const g=ngan(d.ngan);return `<div class="dong" style="cursor:pointer" data-tl="${d.id}"><div class="bieu" style="background:${g.mau}22">${g.to}</div><div class="giua"><b>${q?toSang(d.ten,q):esc(d.ten)}</b><small>${g.ten} · ${NOI[d.noi]||""} ${d.duong?"› "+esc(d.duong):""}</small></div>${d.bai!==""&&d.bai!=null?`<span class="chip">Bài ${d.bai}</span>`:""}${d.mau?`<span class="chip" style="background:#F1F5F9;color:#64748B">mẫu</span>`:""}</div>`;}
+document.addEventListener("click",e=>{const t=e.target.closest("[data-tl]");if(t)xemTL(t.dataset.tl);});
+let nganLoc=null;
+VE["kho"]=()=>{
+  $("#nganLuoi").innerHTML=NGAN.map(n=>`<button class="ngan-the ${nganLoc===n.id?"dang":""}" data-loc="${n.id}" style="background:linear-gradient(135deg,${n.mau},${n.mau}CC)"><div class="to">${n.to}</div><b>${n.ten}</b><span>${S.docs.filter(d=>d.ngan===n.id).length}</span></button>`).join("");
+  $$("[data-loc]").forEach(b=>b.onclick=()=>{nganLoc=nganLoc===b.dataset.loc?null:b.dataset.loc;VE.kho();});
+  const ds=S.docs.filter(d=>!nganLoc||d.ngan===nganLoc); $("#tieuNgan").textContent=nganLoc?ngan(nganLoc).to+" "+ngan(nganLoc).ten+" ("+ds.length+")":"Tất cả tài liệu ("+ds.length+")";
+  $("#boLoc").style.display=nganLoc?"":"none"; $("#boLoc").onclick=()=>{nganLoc=null;VE.kho();};
+  $("#dsKho").innerHTML=ds.length?ds.slice().reverse().map(d=>dongTL(d)).join(""):`<div class="trong">Ngăn này còn trống.</div>`;
+  $("#soKho").textContent=S.docs.length;
+};
+/* tìm */
+let locLoaiDang="tat-ca", tBatDauTim=null;
+VE["tim"]=()=>{
+  const q=$("#oTim").value; const LOAI=[["tat-ca","Tất cả"],["tl","🗂️ Tài liệu"],["bai","📘 Bài dạy"],["lop","🏫 Lớp"],["hs","👧 Mã HS"],["viec","✅ Việc"]];
+  const t0=performance.now(); const kq=q.trim()?timTatCa(q):[]; const ms=performance.now()-t0;
+  $("#locLoai").innerHTML=LOAI.map(([id,ten])=>`<button class="chip ${locLoaiDang===id?"dang":""}" data-loai="${id}">${ten} ${id!=="tat-ca"?"("+kq.filter(k=>k.loai===id).length+")":""}</button>`).join("");
+  $$("[data-loai]").forEach(b=>b.onclick=()=>{locLoaiDang=b.dataset.loai;VE.tim();});
+  const hien=kq.filter(k=>locLoaiDang==="tat-ca"||k.loai===locLoaiDang);
+  $("#kqTomTat").innerHTML=q.trim()?`Tìm «<b>${esc(q)}</b>» → <b>${kq.length}</b> kết quả trong <b>${ms<1?"chưa tới 1":Math.round(ms)}</b> mili giây · máy hiểu: <i>${esc(donVi(q).join(" · "))}</i>`:"Gõ vào ô tìm kiếm phía trên. Ví dụ: <i>pht bai 5</i> · <i>de kt hk1</i> · <i>bien ban to</i> · <i>tiet 46</i> · <i>tv tiet 25</i> · <i>em giu sach doi tay</i> · <i>HS07</i>";
+  $("#kqTim").innerHTML=hien.length?hien.slice(0,40).map(k=>{
+    if(k.loai==="tl")return dongTL(k.d,q);
+    if(k.loai==="bai"&&k.d.mon){const M=PPCT_MON[k.d.mon],t=k.d.tiet,r=M.ds[t-1];return `<div class="dong" style="cursor:pointer" data-di-mon="${k.d.mon}" data-di-mt="${t}"><div class="bieu" style="background:#FCE7F3">${M.icon}</div><div class="giua"><b>${toSang(M.ten+" · Tiết "+t+" · tuần "+r[0]+": "+r[1],q)}</b><small>Phụ lục KHDH của trường · ${esc(M.cd[t-1])}${r[2]?" · 🔗 "+esc(r[2]):""}</small></div>${nhanTT(S.tietMon[k.d.mon][t]||0)}</div>`;}
+    if(k.loai==="bai"&&k.d.tiet){const t=k.d.tiet,p=PPCT[t-1];return `<div class="dong" style="cursor:pointer" data-di-tiet="${t}"><div class="bieu" style="background:#CCFBF1">📅</div><div class="giua"><b>Tiết ${t} · tuần ${p[0]}: ${esc(p[1])}</b><small>PPCT Toán 1 của trường · tuần ${p[0]} bắt đầu ${ddmm(ngayCuaTuan(p[0],0))}</small></div>${nhanTT(S.tiet[t]||0)}</div>`;}
+    if(k.loai==="bai"){const b=k.d;return `<div class="dong" style="cursor:pointer" data-di-bai="${b.so}"><div class="bieu" style="background:#EEF2FF">📘</div><div class="giua"><b>${toSang("Bài "+b.so+": "+b.ten,q)}</b><small>Toán 1 · ${esc(b.cd)} · ${b.tiet} tiết</small></div>${nhanTT(trangThaiBai(b.so))}</div>`;}
+    if(k.loai==="viec")return dongViec(k.d,q);
+    if(k.loai==="lop")return `<div class="dong" style="cursor:pointer" data-di-lop="${esc(k.d.ten)}"><div class="bieu" style="background:#ECFDF5">🏫</div><div class="giua"><b>Lớp ${esc(k.d.ten)}</b><small>${k.d.siso} học sinh (mã)</small></div></div>`;
+    if(k.loai==="hs")return `<div class="dong" style="cursor:pointer" data-di-lop="${esc(k.d.lop)}" data-hs="${k.d.ma}"><div class="bieu" style="background:#FEF3C7">👧</div><div class="giua"><b>${k.d.lop} · ${k.d.ma}</b><small>${esc(S.ghiChuHs[k.d.lop+"-"+k.d.ma]||"Chưa có ghi chú")}</small></div></div>`;
+  }).join(""):(q.trim()?`<div class="trong rung">😕 Chưa thấy. Thử từ khác, hoặc bấm «＋ Thêm tài liệu» để ghi vào sổ.</div>`:"");
+  $$("[data-di-mon]").forEach(x=>x.onclick=()=>{ghiDoSoTay(q);monBai=x.dataset.diMon;tietNhay=+x.dataset.diMt;tuanXem=PPCT_MON[monBai].ds[tietNhay-1][0];location.hash="bai";});
+  $$("[data-di-bai]").forEach(x=>x.onclick=()=>{ghiDoSoTay(q);monBai="toan";baiNhay=+x.dataset.diBai;location.hash="bai";});
+  $$("[data-di-tiet]").forEach(x=>x.onclick=()=>{ghiDoSoTay(q);monBai="toan";tietNhay=+x.dataset.diTiet;tuanXem=PPCT[tietNhay-1][0];location.hash="bai";});
+  $$("[data-di-lop]").forEach(x=>x.onclick=()=>{ghiDoSoTay(q);lopDang=x.dataset.diLop;hsNhay=x.dataset.hs||null;location.hash="lop";});
+};
+$("#oTim").addEventListener("input",()=>{if(!tBatDauTim&&$("#oTim").value)tBatDauTim=performance.now();if(!$("#oTim").value)tBatDauTim=null;if(manDang!=="tim"){location.hash="tim";}else VE.tim();});
+function ghiDoSoTay(q){if(!S.doSoTay||!tBatDauTim)return;const g=(performance.now()-tBatDauTim)/1000;tBatDauTim=null;S.doLog.push({ngay:iso(new Date()),nguoi:($("#doNguoi").value||"GV1").slice(0,12),cach:"so-tay",tl:q.slice(0,80),giay:+g.toFixed(1)});luu();bao("⏱️ Tìm bằng Sổ tay: "+giay(g)+" giây — đã ghi vào Đo hiệu quả");}
+
+/* xem tài liệu */
+function xemTL(id){const d=S.docs.find(x=>x.id===id);if(!d)return;ghiDoSoTay($("#oTim").value);const g=ngan(d.ngan);
+  $("#hopXemNoi").innerHTML=`<div style="display:flex;gap:14px;align-items:center"><div style="width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:34px;background:${g.mau}22">${g.to}</div><div style="flex:1"><div class="chip" style="background:${g.mau};color:#fff">${g.ten}</div><h2 style="margin:6px 0 0">${esc(d.ten)}</h2></div><button class="nut nho phu" data-dong>✕</button></div>
+  <div class="the" style="margin-top:16px;background:#FFFBEB;border-color:#FCD34D"><div style="font-size:14px;color:var(--chu-phu)">BẢN GỐC NẰM Ở</div><div style="font-size:22px;font-weight:800;margin-top:4px">${NOI[d.noi]||""}</div><div style="font-size:18px;margin-top:4px">${esc(d.duong||"(chưa ghi đường dẫn)")}</div></div>
+  <p>${d.nhan.map(n=>`<span class="chip">#${esc(n)}</span>`).join(" ")} ${d.bai!==""&&d.bai!=null?`<span class="chip">📘 Bài ${d.bai}: ${esc(DS_BAI[d.bai].ten)}</span>`:""}</p><p class="phu">Ghi vào sổ ngày ${fmtNgay(d.ngay)}${d.mau?" · dữ liệu mẫu":""}</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="nut" id="xemChep">📋 Chép đường dẫn</button><button class="nut phu" id="xemSua">✏️ Sửa</button></div>`;
+  $("#hopXem").classList.add("mo");
+  $("#xemChep").onclick=()=>{try{navigator.clipboard.writeText(d.duong||"");}catch(e){}ting();bao("Đã chép đường dẫn");};
+  $("#xemSua").onclick=()=>{$("#hopXem").classList.remove("mo");moThem(d);};
+}
+/* thêm / sửa */
+let dangSua=null, aiChon=null;
+function moThem(d,tenSan){
+  dangSua=d||null; hocLai(); $("#hopTieu").textContent=d?"✏️ Sửa tài liệu":"＋ Thêm tài liệu vào sổ";
+  $("#tlNgan").innerHTML=NGAN.map(n=>`<option value="${n.id}">${n.to} ${n.ten}</option>`).join("");
+  $("#tlBai").innerHTML=`<option value="">— Không gắn bài —</option>`+DS_BAI.map(b=>`<option value="${b.so}">Bài ${b.so}: ${esc(b.ten)}</option>`).join("");
+  $("#tlTen").value=d?d.ten:(tenSan||""); $("#tlNgan").value=d?d.ngan:"khac"; $("#tlBai").value=d&&d.bai!==""?d.bai:""; $("#tlNoi").value=d?d.noi:"drive"; $("#tlDuong").value=d?d.duong:""; $("#tlNhanO").value=d?d.nhan.join(", "):"";
+  $("#tlXoa").style.display=d?"":"none"; aiChon=null; $("#tlPii").classList.remove("hien");
+  $("#hopTL").classList.add("mo"); capNhatAI(true); if(!CHUP)setTimeout(()=>$("#tlTen").focus(),50);
+}
+function capNhatAI(tuDong){
+  const ten=$("#tlTen").value; const kq=duDoan(ten).slice(0,3);
+  if(tuDong&&!dangSua&&kq[0]&&!aiChon)$("#tlNgan").value=kq[0].id;
+  if(!ten.trim()){$("#aiGoiY").innerHTML=`<div class="trong" style="padding:10px">Gõ tên tài liệu, AI sẽ đoán ngăn…</div>`;$("#aiNhan").innerHTML="";return;}
+  $("#aiGoiY").innerHTML=kq.map((k,i)=>{const g=ngan(k.id);return `<div class="ai-dong ${($("#tlNgan").value===k.id)?"chon":""}" data-ai="${k.id}"><span style="font-size:20px">${g.to}</span><b>${g.ten}</b><div class="thanh"><i style="width:${Math.round(k.p*100)}%"></i></div><b style="text-align:right">${Math.round(k.p*100)}%</b></div>`;}).join("");
+  $$("[data-ai]").forEach(x=>x.onclick=()=>{$("#tlNgan").value=x.dataset.ai;aiChon=x.dataset.ai;capNhatAI(false);});
+  const nhan=goiYNhan(ten); const bai=doanBai(ten);
+  $("#aiNhan").innerHTML=(nhan.length||bai!=="")?`<small style="color:var(--chu-phu)">Nhãn gợi ý:</small> `+nhan.map(n=>`<button class="chip" data-nhan="${esc(n)}">＋ ${esc(n)}</button>`).join("")+(bai!==""?` <button class="chip" data-gan-bai="${bai}">📘 Gắn Bài ${bai}</button>`:""):"";
+  $$("[data-nhan]").forEach(b=>b.onclick=()=>{const cu=$("#tlNhanO").value.split(",").map(s=>s.trim()).filter(Boolean);if(!cu.includes(b.dataset.nhan))cu.push(b.dataset.nhan);$("#tlNhanO").value=cu.join(", ");b.remove();});
+  $$("[data-gan-bai]").forEach(b=>b.onclick=()=>{$("#tlBai").value=b.dataset.ganBai;b.remove();});
+}
+$("#tlTen").addEventListener("input",()=>capNhatAI(true));
+$("#tlNgan").addEventListener("change",()=>{aiChon=$("#tlNgan").value;capNhatAI(false);});
+$("#nutThem").onclick=()=>moThem(null);
+$("#tlLuu").onclick=()=>{
+  const ten=$("#tlTen").value.trim(); if(!ten){$("#tlTen").classList.add("rung");ting(false);setTimeout(()=>$("#tlTen").classList.remove("rung"),400);bao("Thầy gõ tên tài liệu trước nhé");return;}
+  const loi=soatRieng(ten+" "+$("#tlDuong").value+" "+$("#tlNhanO").value); if(loi.length){$("#tlPii").innerHTML="🔒 Chưa lưu: "+loi.join("; ")+". Sổ tay chỉ dùng mã HS.";$("#tlPii").classList.add("hien");ting(false);return;}
+  const ai=duDoan(ten)[0]; const ngTruoc=ai?ai.id:null;
+  const ban={ten,ngan:$("#tlNgan").value,noi:$("#tlNoi").value,duong:$("#tlDuong").value.trim(),nhan:$("#tlNhanO").value.split(",").map(s=>s.trim()).filter(Boolean),bai:$("#tlBai").value===""?"":+$("#tlBai").value};
+  if(dangSua)Object.assign(dangSua,ban); else S.docs.push({id:"d"+Date.now().toString(36),ngay:iso(new Date()),...ban});
+  luu(); hocLai(); $("#hopTL").classList.remove("mo"); ting(); phaoGiay();
+  bao(ngTruoc&&ngTruoc!==ban.ngan?"Đã lưu · AI đã học thêm: «"+ngan(ban.ngan).ten+"»":"Đã lưu vào ngăn "+ngan(ban.ngan).ten);
+  VE[manDang]&&VE[manDang](); $("#soKho").textContent=S.docs.length;
+};
+$("#tlXoa").onclick=()=>{if(!dangSua)return;const i=S.docs.indexOf(dangSua),cu=dangSua;S.docs.splice(i,1);luu();hocLai();$("#hopTL").classList.remove("mo");VE[manDang]&&VE[manDang]();bao("Đã xoá «"+cu.ten.slice(0,40)+"»",()=>{S.docs.splice(i,0,cu);luu();hocLai();VE[manDang]&&VE[manDang]();});};
+
+/* lớp */
+let lopDang=null, hsNhay=null;
+VE["lop"]=()=>{
+  if(!lopDang&&S.lop[0])lopDang=S.lop[0].ten;
+  $("#lopLuoi").innerHTML=S.lop.map(l=>{const co=Object.keys(S.ghiChuHs).filter(k=>k.startsWith(l.ten+"-")).length;return `<button class="the lop-the" data-lop="${esc(l.ten)}" style="cursor:pointer;${lopDang===l.ten?"outline:3px solid var(--chinh)":""}">
+    <svg width="90" height="60" viewBox="0 0 90 60" aria-hidden="true"><rect x="5" y="20" width="80" height="36" rx="6" fill="url(#gTim)"/><path d="M45 2L88 22H2z" fill="#F59E0B"/><rect x="38" y="34" width="14" height="22" rx="2" fill="#FDE68A"/><rect x="14" y="30" width="14" height="10" rx="2" fill="#E0E7FF"/><rect x="62" y="30" width="14" height="10" rx="2" fill="#E0E7FF"/></svg>
+    <div class="ten-lop">${esc(l.ten)}</div><div class="phu">${l.siso} học sinh · ${co} ghi chú</div><div class="thanh" style="margin-top:8px"><i style="width:${Math.round(co/Math.max(1,l.siso)*100)}%"></i></div></button>`;}).join("");
+  $$("[data-lop]").forEach(b=>b.onclick=()=>{lopDang=b.dataset.lop;VE.lop();});
+  const l=S.lop.find(x=>x.ten===lopDang); if(!l){$("#lopChiTiet").innerHTML="";return;}
+  $("#lopChiTiet").innerHTML=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h3 style="margin:0;flex:1">Lớp ${esc(l.ten)} — bấm mã để ghi chú</h3><label>Tên lớp <input class="o" id="lopTen" value="${esc(l.ten)}" style="width:90px;display:inline-block;padding:8px"></label><label>Sĩ số <input class="o" id="lopSiSo" type="number" min="1" max="60" value="${l.siso}" style="width:90px;display:inline-block;padding:8px"></label><button class="nut nho" id="lopLuu">Lưu</button></div>
+  <div class="hs-luoi">${[...Array(+l.siso)].map((_,i)=>{const ma=maHs(i+1);const co=S.ghiChuHs[l.ten+"-"+ma];return `<button class="hs ${co?"co":""}" data-hs-ma="${ma}" title="${esc(co||"")}">${ma}${co?" ✎":""}</button>`;}).join("")}</div>
+  <div id="hsGhi" style="margin-top:14px"></div>`;
+  $("#lopLuu").onclick=()=>{const t=$("#lopTen").value.trim()||l.ten,s=Math.max(1,Math.min(60,+$("#lopSiSo").value||l.siso));if(t!==l.ten){Object.keys(S.ghiChuHs).forEach(k=>{if(k.startsWith(l.ten+"-")){S.ghiChuHs[t+k.slice(l.ten.length)]=S.ghiChuHs[k];delete S.ghiChuHs[k];}});}l.ten=t;l.siso=s;lopDang=t;luu();ting();VE.lop();};
+  $$("[data-hs-ma]").forEach(b=>b.onclick=()=>moGhiHs(l,b.dataset.hsMa));
+  if(hsNhay){moGhiHs(l,hsNhay);hsNhay=null;}
+};
+function moGhiHs(l,ma){const k=l.ten+"-"+ma;$("#hsGhi").innerHTML=`<div class="the" style="background:#F5F3FF"><b>${esc(l.ten)} · ${ma}</b> — ghi chú tiến bộ (chỉ điều thầy quan sát; không tên, không SĐT, không bệnh)<textarea class="o" id="hsO" rows="3" style="margin-top:8px" placeholder="VD: đọc, viết số 6–10 đúng; còn nhầm 9 và 6 khi so sánh">${esc(S.ghiChuHs[k]||"")}</textarea><div class="pii" id="hsPii"></div><button class="nut nho" style="margin-top:8px" id="hsLuu">Lưu ghi chú</button></div>`;
+  $("#hsLuu").onclick=()=>{const v=$("#hsO").value.trim();const loi=soatRieng(v);if(loi.length){$("#hsPii").innerHTML="🔒 Chưa lưu: "+loi.join("; ");$("#hsPii").classList.add("hien");ting(false);return;}if(v)S.ghiChuHs[k]=v;else delete S.ghiChuHs[k];luu();ting();bao("Đã lưu ghi chú "+ma);VE.lop();};
+  if(!CHUP)$("#hsGhi").scrollIntoView({behavior:"smooth",block:"center"});}
+
+/* bài dạy */
+let baiNhay=null, tietNhay=null;
+function nhanTT(v){return `<span class="tt tt${v}">${["Chưa soạn","Đã soạn","Đã dạy"][v]}</span>`;}
+/* tuần theo PPCT: tuần 1 bắt đầu thứ Hai S.tuan1 */
+function tuanCua(d){const t1=new Date(S.tuan1+"T00:00:00");const n=Math.floor((new Date(iso(d)+"T00:00:00")-t1)/(7*864e5))+1;return Math.max(1,Math.min(35,n));}
+function ngayCuaTuan(tu,thu){const d=new Date(S.tuan1+"T00:00:00");d.setDate(d.getDate()+(tu-1)*7+(thu||0));return d;}
+function ddmm(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0");}
+function tietCuaBai(bai){return PPCT.map((p,i)=>i+1).filter(t=>PPCT[t-1][2]===bai);}
+function trangThaiBai(bai){const ts=tietCuaBai(bai);if(!ts.length)return 0;const m=Math.min(...ts.map(t=>S.tiet[t]||0));return m;}
+let tuanXem=null, monBai="toan";
+function tenGoc(s){return String(s).replace(/\s*[-–]\s*Tiết\s*\d+\s*$/i,"").replace(/\s*\(T\d+\)\s*$/i,"").trim();}
+function soTietTuan(m,w){return m==="toan"?PPCT.filter(p=>p[0]===w).length:PPCT_MON[m].ds.filter(r=>r[0]===w).length;}
+function veChonMon(){
+  const ds=[["toan","🔢","Toán 1",PPCT.length]].concat(Object.keys(PPCT_MON).map(m=>[m,PPCT_MON[m].icon,PPCT_MON[m].ten,PPCT_MON[m].ds.length]));
+  $("#chonMon").innerHTML=ds.map(([m,ic,ten,n])=>`<button class="chip ${monBai===m?"dang":""}" data-mon-bai="${m}" style="font-size:14px;padding:7px 13px">${ic} ${ten} <small style="opacity:.75">${n} tiết</small></button>`).join("");
+  $$("[data-mon-bai]").forEach(b=>b.onclick=()=>{monBai=b.dataset.monBai;VE.bai();});
+  $("#tuanMon").innerHTML=`📅 Tuần ${tuanXem}, lớp 1 học: `+ds.map(([m,ic,ten])=>`${ic} ${ten.replace(/ 1$/,"")} <b>${soTietTuan(m,tuanXem)}</b>`).join(" · ")+" tiết";
+}
+function veVong(tiet,tietDay,tietSoan,nguon){
+  const r=70,C=2*Math.PI*r; $("#vongTienDo").innerHTML=`<svg width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="${r}" stroke="#E0E7FF" stroke-width="22" fill="none"/><circle cx="100" cy="100" r="${r}" stroke="#FCD34D" stroke-width="22" fill="none" stroke-dasharray="${C*tietSoan/tiet} ${C}" transform="rotate(-90 100 100)" stroke-linecap="round"/><circle cx="100" cy="100" r="${r}" stroke="url(#gTim)" stroke-width="22" fill="none" stroke-dasharray="${C*tietDay/tiet} ${C}" transform="rotate(-90 100 100)" stroke-linecap="round"/><text x="100" y="98" text-anchor="middle" font-size="34" font-weight="800" fill="#1E1B4B">${Math.round(tietDay/tiet*100)}%</text><text x="100" y="122" text-anchor="middle" font-size="13" fill="#5B5F86">tiết đã dạy</text></svg>`;
+  $("#tienDoChu").innerHTML=`<p>🟣 Đã dạy: <b>${tietDay}</b> / ${tiet} tiết<br>🟡 Đã soạn: <b>${tietSoan}</b> / ${tiet} tiết</p><p class="phu">${nguon}</p>`;}
+function chipGc(g){return g?` · <span class="chip" style="padding:1px 8px;background:#ECFEFF;color:#0E7490">🔗 ${esc(g)}</span>`:"";}
+function veMon(m){
+  const M=PPCT_MON[m], st=S.tietMon[m], tn=tuanCua(HOM_NAY);
+  $("#baiTieu").textContent=`${M.icon} Bài dạy ${M.ten} — theo phụ lục KHDH của trường`;
+  $("#baiNguon").textContent=`35 tuần · ${M.ds.length} tiết (Phụ lục kèm theo KHDH lớp 1 năm học 2026–2027 của trường, bộ Kết nối tri thức với cuộc sống).`;
+  const tietTuan=M.ds.map((r,i)=>({t:i+1,r})).filter(x=>x.r[0]===tuanXem);
+  $("#tuanNay").innerHTML=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:220px"><h3>📅 Tuần ${tuanXem}${tuanXem===tn?" (tuần này)":""} · ${ddmm(ngayCuaTuan(tuanXem,0))} – ${ddmm(ngayCuaTuan(tuanXem,4))}</h3><p>Theo phụ lục KHDH của trường: ${tietTuan.length} tiết ${M.ten}. Bấm 📝 để lập khung KHBD đúng mẫu trường.</p></div><button class="nut nho phu" data-tuan="-1">◀ Tuần trước</button><button class="nut nho phu" data-tuan="0">Tuần này</button><button class="nut nho phu" data-tuan="1">Tuần sau ▶</button></div>
+    <div class="tiet-o">${tietTuan.map(x=>`<div><b>Tiết ${x.t}: ${esc(x.r[1])}</b><small>${["Chưa soạn","Đã soạn","Đã dạy"][st[x.t]||0]}${x.r[2]?" · 🔗 "+esc(x.r[2]):""}</small><div style="margin-top:8px"><button class="nut nho" data-khung-mon="${x.t}" style="background:#fff;color:#0F766E;box-shadow:none">📝 Khung KHBD</button></div></div>`).join("")}</div>`;
+  $$("[data-tuan]").forEach(b=>b.onclick=()=>{const d=+b.dataset.tuan;tuanXem=d?Math.max(1,Math.min(35,tuanXem+d)):tn;VE.bai();});
+  let h="",tu=0;M.ds.forEach((r,i)=>{const t=i+1;if(r[0]!==tu){tu=r[0];h+=`<div class="tuan-nhom ${tu===tn?"nay":""}" id="tuan-${tu}">Tuần ${tu} <small style="font-weight:500;color:var(--chu-phu)">${ddmm(ngayCuaTuan(tu,0))}</small></div>`;}
+    const v=st[t]||0;
+    h+=`<div class="bai" id="tiet-${t}"><div class="so-bai">${t}</div><div style="flex:1;min-width:0"><b>${esc(r[1])}</b><div class="phu" style="margin:0;font-size:13px">${esc(M.cd[i])}${chipGc(r[2])}</div></div><button class="nut nho phu" data-khung-mon="${t}" title="Lập khung KHBD">📝</button><button class="tt tt${v}" data-ttm="${t}">${["Chưa soạn","Đã soạn","Đã dạy"][v]}</button></div>`;});
+  $("#dsBai").innerHTML=h;
+  $$("[data-ttm]").forEach(b=>b.onclick=()=>{const n=+b.dataset.ttm;st[n]=((st[n]||0)+1)%3;luu();if(st[n]===2){ting();phaoGiay();}VE.bai();});
+  $$("[data-khung-mon]").forEach(b=>b.onclick=()=>{location.hash="khbd&mon="+m+"&mt="+b.dataset.khungMon;});
+  $("#tuan1").value=S.tuan1; $("#tuan1").onchange=()=>{if($("#tuan1").value){S.tuan1=$("#tuan1").value;luu();tuanXem=null;VE.bai();bao("Đã đặt tuần 1 bắt đầu "+fmtNgay(S.tuan1));}};
+  const tiet=M.ds.length, tietDay=M.ds.filter((r,i)=>st[i+1]===2).length, tietSoan=M.ds.filter((r,i)=>(st[i+1]||0)>=1).length;
+  veVong(tiet,tietDay,tietSoan,`Tên tiết, số tiết, tuần lấy đúng phụ lục KHDH ${M.ten} của trường (${tiet} tiết).`);
+  if(tietNhay!=null){const el=$("#tiet-"+tietNhay);if(el){el.style.outline="3px solid var(--vang)";if(!CHUP)el.scrollIntoView({block:"center"});}tietNhay=null;}
+}
+VE["bai"]=()=>{
+  if(tuanXem==null)tuanXem=tuanCua(HOM_NAY);
+  if(!PPCT_MON[monBai])monBai="toan";
+  veChonMon();
+  if(monBai!=="toan")return veMon(monBai);
+  $("#baiTieu").textContent="📘 Bài dạy Toán 1 — theo phân phối chương trình của trường";
+  $("#baiNguon").textContent="35 tuần · 105 tiết (PPCT Toán 1 năm học 2026–2027 của trường, bộ Kết nối tri thức với cuộc sống).";
+  veToan();
+};
+function veToan(){
+  const tn=tuanCua(HOM_NAY); if(tuanXem==null)tuanXem=tn;
+  const tietTuan=PPCT.map((p,i)=>({t:i+1,p})).filter(x=>x.p[0]===tuanXem);
+  $("#tuanNay").innerHTML=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:220px"><h3>📅 Tuần ${tuanXem}${tuanXem===tn?" (tuần này)":""} · ${ddmm(ngayCuaTuan(tuanXem,0))} – ${ddmm(ngayCuaTuan(tuanXem,4))}</h3><p>Theo PPCT của trường: ${tietTuan.length} tiết Toán 1. Bấm 📝 để lập khung KHBD đúng mẫu trường.</p></div><button class="nut nho phu" data-tuan="-1">◀ Tuần trước</button><button class="nut nho phu" data-tuan="0">Tuần này</button><button class="nut nho phu" data-tuan="1">Tuần sau ▶</button></div>
+    <div class="tiet-o">${tietTuan.map(x=>{const lg=timLongGhep(DS_BAI[x.p[2]].ten);return `<div><b>Tiết ${x.t}: ${esc(x.p[1])}</b><small>${["Chưa soạn","Đã soạn","Đã dạy"][S.tiet[x.t]||0]}${lg.length?" · 🤖 lồng ghép AI "+lg[0].ma.join(", "):""}</small><div style="margin-top:8px"><button class="nut nho" data-khung="${x.t}" style="background:#fff;color:#0F766E;box-shadow:none">📝 Khung KHBD</button></div></div>`;}).join("")}</div>`;
+  $$("[data-tuan]").forEach(b=>b.onclick=()=>{const d=+b.dataset.tuan;tuanXem=d?Math.max(1,Math.min(35,tuanXem+d)):tn;VE.bai();});
+  let h="",tu=0;PPCT.forEach((p,i)=>{const t=i+1;if(p[0]!==tu){tu=p[0];h+=`<div class="tuan-nhom ${tu===tn?"nay":""}" id="tuan-${tu}">Tuần ${tu} <small style="font-weight:500;color:var(--chu-phu)">${ddmm(ngayCuaTuan(tu,0))}</small></div>`;}
+    const v=S.tiet[t]||0;const b=DS_BAI[p[2]];const so=S.docs.filter(d=>d.bai===b.so).length;const lg=timLongGhep(b.ten);
+    h+=`<div class="bai" id="tiet-${t}"><div class="so-bai">${t}</div><div style="flex:1;min-width:0"><b>${esc(p[1])}</b><div class="phu" style="margin:0;font-size:13px">Bài ${b.so} · ${esc(b.cd)}${so?` · <a href="#" data-xem-bai="${b.so}">📎 ${so} tài liệu</a>`:""}${lg.length?` · <span class="chip chip-ai" style="padding:1px 8px">🤖 ${lg[0].ma.join(", ")}</span>`:""}${chipGc(GC_TOAN[t])}</div></div><button class="nut nho phu" data-khung="${t}" title="Lập khung KHBD">📝</button><button class="tt tt${v}" data-tt="${t}">${["Chưa soạn","Đã soạn","Đã dạy"][v]}</button></div>`;});
+  $("#dsBai").innerHTML=h;
+  $$("[data-tt]").forEach(b=>b.onclick=()=>{const n=+b.dataset.tt;S.tiet[n]=((S.tiet[n]||0)+1)%3;luu();if(S.tiet[n]===2){ting();phaoGiay();}VE.bai();});
+  $$("[data-khung]").forEach(b=>b.onclick=()=>{location.hash="khbd&tiet="+b.dataset.khung;});
+  $$("[data-xem-bai]").forEach(a=>a.onclick=e=>{e.preventDefault();$("#oTim").value="bai "+a.dataset.xemBai;locLoaiDang="tl";location.hash="tim";});
+  $("#tuan1").value=S.tuan1; $("#tuan1").onchange=()=>{if($("#tuan1").value){S.tuan1=$("#tuan1").value;luu();tuanXem=null;VE.bai();bao("Đã đặt tuần 1 bắt đầu "+fmtNgay(S.tuan1));}};
+  const tiet=PPCT.length, tietDay=PPCT.filter((p,i)=>S.tiet[i+1]===2).length, tietSoan=PPCT.filter((p,i)=>(S.tiet[i+1]||0)>=1).length;
+  const r=70,C=2*Math.PI*r; $("#vongTienDo").innerHTML=`<svg width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="${r}" stroke="#E0E7FF" stroke-width="22" fill="none"/><circle cx="100" cy="100" r="${r}" stroke="#FCD34D" stroke-width="22" fill="none" stroke-dasharray="${C*tietSoan/tiet} ${C}" transform="rotate(-90 100 100)" stroke-linecap="round"/><circle cx="100" cy="100" r="${r}" stroke="url(#gTim)" stroke-width="22" fill="none" stroke-dasharray="${C*tietDay/tiet} ${C}" transform="rotate(-90 100 100)" stroke-linecap="round"/><text x="100" y="98" text-anchor="middle" font-size="34" font-weight="800" fill="#1E1B4B">${Math.round(tietDay/tiet*100)}%</text><text x="100" y="122" text-anchor="middle" font-size="13" fill="#5B5F86">tiết đã dạy</text></svg>`;
+  $("#tienDoChu").innerHTML=`<p>🟣 Đã dạy: <b>${tietDay}</b> / ${tiet} tiết<br>🟡 Đã soạn: <b>${tietSoan}</b> / ${tiet} tiết</p><p class="phu">Tên tiết, số tiết, tuần lấy đúng PPCT Toán 1 của trường (105 tiết).</p>`;
+  if(baiNhay!=null){const t=tietCuaBai(baiNhay)[0];const el=$("#tiet-"+t);if(el&&!CHUP){el.style.outline="3px solid var(--vang)";el.scrollIntoView({block:"center"});}else if(el)el.style.outline="3px solid var(--vang)";baiNhay=null;}
+  else if(tietNhay!=null){const el=$("#tiet-"+tietNhay);if(el){el.style.outline="3px solid var(--vang)";if(!CHUP)el.scrollIntoView({block:"center"});}tietNhay=null;}
+};
+/* việc */
+function trangThaiViec(v){if(v.xong)return["#D1FAE5","#065F46","Xong"];const h=congNgay(0);if(v.han<h)return["#FEE2E2","#991B1B","Quá hạn"];if(v.han<=congNgay(2))return["#FEF3C7","#92400E","Sắp đến hạn"];return["#EEF2FF","#3730A3","Còn hạn"];}
+function dongViec(v,q){const [n,c,t]=trangThaiViec(v);return `<div class="dong"><button data-xong="${v.id}" title="Đánh dấu xong" style="width:34px;height:34px;border-radius:99px;border:3px solid ${v.xong?"#10B981":"#C7D2FE"};background:${v.xong?"#10B981":"#fff"};color:#fff;font-size:18px">${v.xong?"✓":""}</button><div class="giua"><b style="${v.xong?"text-decoration:line-through;opacity:.6":""}">${q?toSang(v.ten,q):esc(v.ten)}</b><small>Hạn ${fmtNgay(v.han)}</small></div><span class="chip" style="background:${n};color:${c}">${t}</span></div>`;}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-xong]");if(!b)return;const v=S.viec.find(x=>x.id===b.dataset.xong);if(!v)return;v.xong=!v.xong;luu();if(v.xong){ting();phaoGiay();}VE[manDang]&&VE[manDang]();});
+function veNgay7(sel){const t=["CN","T2","T3","T4","T5","T6","T7"];$(sel).innerHTML=[...Array(7)].map((_,i)=>{const d=new Date(HOM_NAY);d.setDate(d.getDate()+i);const co=S.viec.some(v=>!v.xong&&v.han===iso(d));return `<div class="${i?"":"nay"}">${t[d.getDay()]}<br><b>${d.getDate()}</b><i class="${co?"co":""}"></i></div>`;}).join("");}
+VE["viec"]=()=>{veNgay7("#ngay7b");const ds=[...S.viec].sort((a,b)=>(a.xong-b.xong)||a.han.localeCompare(b.han));$("#dsViec").innerHTML=ds.length?ds.map(v=>dongViec(v)).join(""):`<div class="trong">Chưa có việc.</div>`;if(!$("#viecHan").value)$("#viecHan").value=congNgay(1);};
+$("#nutThemViec").onclick=()=>{const t=$("#viecTen").value.trim();if(!t){ting(false);$("#viecTen").classList.add("rung");setTimeout(()=>$("#viecTen").classList.remove("rung"),400);return;}const loi=soatRieng(t);if(loi.length){bao("🔒 "+loi[0]);ting(false);return;}S.viec.push({id:"v"+Date.now().toString(36),ten:t,han:$("#viecHan").value||congNgay(1),xong:false});$("#viecTen").value="";luu();ting();VE.viec();};
+
+/* trợ lý câu lệnh AI */
+const AI_VIEC={
+  nx:{ten:"💬 Nhận xét học sinh (TT 27)",o:[["ma","Mã học sinh","HS07"],["mon","Môn","Toán"],["muc","Mức đạt được",["Hoàn thành tốt","Hoàn thành","Chưa hoàn thành"]],["manh","Điểm mạnh thầy quan sát","đếm, đọc, viết đúng các số đến 10; tích cực giơ tay"],["yeu","Điều cần cố gắng","còn nhầm dấu > và < khi so sánh"]]},
+  de:{ten:"🧪 Đề kiểm tra",o:[["mon","Môn","Toán 1"],["pham","Phạm vi kiến thức","Bài 1–13 (các số đến 10, phép cộng, trừ trong phạm vi 10)"],["so","Số câu","10"],["muc","Mức độ","3 mức theo TT 27 (Mức 1 – 2 – 3)"]]},
+  khbd:{ten:"📘 KHBD theo mẫu trường",o:[["bai","Tên bài học","Khối lập phương, khối hộp chữ nhật"],["mon","Môn học/hoạt động giáo dục","Toán"],["lop","Lớp","1"],["st","Số tiết","02 (tiết 44)"],["kieu","Kiểu KHBD",["Bài thường","Tiết tăng cường","Sinh hoạt lớp – HĐTN"]],["lg","Lồng ghép giáo dục AI (theo phụ lục của trường)","1.D2.1, 1.D2.2"]]},
+  pht:{ten:"📝 Phiếu học tập",o:[["bai","Bài","Bài 5: Mấy và mấy"],["muc","Mục tiêu","tách, gộp số trong phạm vi 10"],["so","Số bài tập","4"],["ht","Hình thức","có hình để tô, nối; chữ to cho học sinh lớp 1"]]}
+};
+let aiDang="nx";
+VE["ai"]=()=>{
+  $("#aiViec").innerHTML=Object.entries(AI_VIEC).map(([k,v])=>`<button class="chip ${aiDang===k?"dang":""}" data-aiv="${k}" style="font-size:15px;padding:8px 14px">${v.ten}</button>`).join("");
+  $$("[data-aiv]").forEach(b=>b.onclick=()=>{aiDang=b.dataset.aiv;$("#goiYNhanh").innerHTML="";VE.ai();});
+  const v=AI_VIEC[aiDang]; $("#aiForm").innerHTML=`<h3 style="margin:0">${v.ten}</h3>`+v.o.map(([id,ten,mau])=>Array.isArray(mau)?`<label class="nhan">${ten}</label><select class="o" data-ai-o="${id}">${mau.map(m=>`<option>${m}</option>`).join("")}</select>`:`<label class="nhan">${ten}</label><input class="o" data-ai-o="${id}" value="${esc(mau)}">`).join("")+`<p class="phu" style="margin-top:12px">🔒 Chỉ ghi mã HS. Máy soát lại trước khi cho sao chép.</p>`;
+  $$("[data-ai-o]").forEach(i=>i.addEventListener("input",soanLenh)); $("#nutGoiYNhanh").style.display=aiDang==="nx"?"":"none"; soanLenh();
+};
+function giaTri(){const o={};$$("[data-ai-o]").forEach(i=>o[i.dataset.aiO]=i.value.trim());return o;}
+function soanLenh(){const o=giaTri();let t="";
+  if(aiDang==="nx")t=`Bạn là giáo viên tiểu học có kinh nghiệm. Hãy viết lời nhận xét môn ${o.mon} cho học sinh lớp 1 (mã ${o.ma}), theo tinh thần Thông tư 27/2020/TT-BGDĐT: động viên, cụ thể, chỉ ra điều làm được và cách tiến bộ.\n- Mức đạt được: ${o.muc}\n- Điểm mạnh giáo viên quan sát: ${o.manh}\n- Điều cần cố gắng: ${o.yeu}\nYêu cầu: 2–3 câu, xưng "con", không so sánh với bạn khác, không thêm điều tôi không nêu. Viết 3 phương án để tôi chọn.`;
+  if(aiDang==="de")t=`Bạn là giáo viên tiểu học. Soạn đề kiểm tra ${o.mon}, bộ sách Kết nối tri thức với cuộc sống.\n- Phạm vi: ${o.pham}\n- Số câu: ${o.so}\n- Mức độ: ${o.muc}\nYêu cầu: kèm ma trận (câu – nội dung – mức), đáp án; không dùng kiến thức ngoài phạm vi; chữ to, có hình gợi ý cho học sinh lớp 1. Ghi rõ "BẢN NHÁP — giáo viên duyệt trước khi dùng".`;
+  if(aiDang==="pht")t=`Bạn là giáo viên lớp 1. Soạn phiếu học tập ${o.bai} (Toán 1, Kết nối tri thức với cuộc sống).\n- Mục tiêu: ${o.muc}\n- Số bài tập: ${o.so}\n- Hình thức: ${o.ht}\nYêu cầu: mỗi bài một câu lệnh ngắn, có đáp án cho giáo viên ở cuối, không vượt nội dung bài.`;
+  if(aiDang==="khbd"){const k={"Bài thường":"thuong","Tiết tăng cường":"tang","Sinh hoạt lớp – HĐTN":"shl"}[o.kieu]||"thuong";const hd=HD_KIEU[k];
+    t=`Bạn là giáo viên tiểu học. Soạn KẾ HOẠCH BÀI DẠY ${o.mon}, lớp ${o.lop}, bài «${o.bai}», số tiết: ${o.st} — bộ sách Kết nối tri thức với cuộc sống, bám Chương trình GDPT 2018, đúng MẪU CỦA TRƯỜNG TÔI:
+- Đầu bài: Môn học/hoạt động giáo dục; Lớp; Tên bài học; Số tiết; Thời gian thực hiện.
+- 1. Yêu cầu cần đạt: 1.1. Năng lực đặc thù; 1.2. Năng lực chung; 1.3. Phẩm chất${k==="tang"?"":"; 1.4. Tích hợp"+(o.lg&&!/^kh[oô]ng/i.test(o.lg)?" (ghi giáo dục AI: "+o.lg+")":"")}.
+- 2. Đồ dùng dạy học: 2.1. Giáo viên; 2.2. Học sinh — chỉ ghi đồ dùng riêng của tiết, KHÔNG ghi SGK, SGV, bài giảng điện tử, sách bài tập, bảng con.
+- 3. Các hoạt động dạy học chủ yếu: bảng 2 cột (Hoạt động của giáo viên | Hoạt động của học sinh), đúng ${hd.length} hoạt động, ghi đúng tên: ${hd.join("; ")}.
+- 4. Điều chỉnh sau bài dạy: để dòng chấm.
+Lưu ý của trường: không dùng các từ «mục tiêu», «chuẩn bị», «tiến trình», «quy trình», «kiểm tra bài cũ», «củng cố, dặn dò», «giới thiệu bài»; câu hỏi của GV và câu trả lời của HS ngang dòng, tương xứng; có phân hoá HSHTT và HSCHT; hạn chế hình ảnh trong bảng; không đưa kiến thức lớp trên.${o.lg&&!/^kh[oô]ng/i.test(o.lg)?" Học sinh lớp 1 không tự dùng công cụ AI — giáo viên thao tác, học sinh quan sát, trả lời.":""}
+Ghi dòng đầu: "BẢN NHÁP — giáo viên duyệt trước khi dùng".`;}
+  $("#aiKetQua").value=t; $("#aiPii").classList.remove("hien");}
+$("#nutSaoChep").onclick=()=>{const t=$("#aiKetQua").value;const loi=soatRieng(t);if(loi.length){$("#aiPii").innerHTML="🔒 <b>Chưa sao chép</b> — "+loi.join("; ")+".";$("#aiPii").classList.add("hien");$("#aiKetQua").classList.add("rung");setTimeout(()=>$("#aiKetQua").classList.remove("rung"),400);ting(false);return;}
+  $("#aiPii").classList.remove("hien");try{navigator.clipboard.writeText(t);}catch(e){$("#aiKetQua").select();document.execCommand&&document.execCommand("copy");}ting();bao("✅ Đã soát — không thấy thông tin riêng. Đã chép câu lệnh, dán vào Gemini / ChatGPT.");};
+$("#nutGoiYNhanh").onclick=()=>{const o=giaTri();const loi=soatRieng(Object.values(o).join(" "));if(loi.length){$("#goiYNhanh").innerHTML=`<div class="pii hien">🔒 ${loi.join("; ")}</div>`;return;}
+  const mo={"Hoàn thành tốt":"Con học môn "+o.mon+" rất tốt.","Hoàn thành":"Con hoàn thành các yêu cầu môn "+o.mon+".","Chưa hoàn thành":"Con đang cố gắng với môn "+o.mon+"."}[o.muc]||"";
+  const cau=[`${mo} Con ${o.manh}. Con cần ${o.yeu}, cô/thầy tin con sẽ làm được.`,`${o.manh?("Con "+o.manh+"."):""} ${o.yeu?("Con cố gắng hơn ở chỗ: "+o.yeu+" nhé!"):""}`.trim()];
+  $("#goiYNhanh").innerHTML=`<div class="the" style="background:#F0FDF4"><b>✨ Ghép từ đúng ý thầy đã điền (không thêm ý mới):</b>${cau.map(c=>`<p style="margin:8px 0">• ${esc(c)}</p>`).join("")}<small class="phu">Thầy đọc, sửa cho tự nhiên rồi mới dùng.</small></div>`;ting();};
+
+/* đo hiệu quả */
+let doT0=null,doHen=null;
+VE["do"]=()=>{$("#doSoTay").checked=!!S.doSoTay;veDo();};
+$("#doSoTay").onchange=()=>{S.doSoTay=$("#doSoTay").checked;luu();bao(S.doSoTay?"Đã bật: mỗi lần tìm bằng Sổ tay sẽ được bấm giờ":"Đã tắt bấm giờ khi tìm");};
+$("#doBatDau").onclick=()=>{doT0=performance.now();$("#doBatDau").disabled=true;$("#doThay").disabled=false;$("#doBo").disabled=false;clearInterval(doHen);doHen=setInterval(()=>{$("#dongHo").textContent=giay((performance.now()-doT0)/1000)+" giây";},100);};
+function dungDo(){clearInterval(doHen);$("#doBatDau").disabled=false;$("#doThay").disabled=true;$("#doBo").disabled=true;}
+$("#doThay").onclick=()=>{const g=(performance.now()-doT0)/1000;dungDo();S.doLog.push({ngay:iso(new Date()),nguoi:($("#doNguoi").value||"GV1").slice(0,12),cach:"cu",tl:$("#doTaiLieu").value.slice(0,80),giay:+g.toFixed(1)});luu();ting();bao("Đã ghi: cách cũ "+giay(g)+" giây");veDo();};
+$("#doBo").onclick=()=>{dungDo();$("#dongHo").textContent="0,0 giây";};
+function tb(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:0;}
+function veDo(){
+  const cu=S.doLog.filter(l=>l.cach==="cu").map(l=>l.giay), moi=S.doLog.filter(l=>l.cach==="so-tay").map(l=>l.giay);
+  const c=$("#doBieuDo"),x=c.getContext("2d"),r=devicePixelRatio||1,W=c.clientWidth||400,H=c.clientHeight||280;c.width=W*r;c.height=H*r;x.scale(r,r);x.clearRect(0,0,W,H);
+  x.font="15px Segoe UI, Arial";
+  if(!cu.length&&!moi.length){x.fillStyle="#5B5F86";x.textAlign="center";x.fillText("Chưa có lượt đo nào — số liệu sẽ hiện ở đây.",W/2,H/2);x.fillText("(Sổ tay không tự đặt số, chỉ vẽ số thầy đo.)",W/2,H/2+24);$("#doTomTat").innerHTML="";}
+  else{const a=tb(cu),b=tb(moi),mx=Math.max(a,b,1)*1.2,bw=Math.min(120,W/4),day=H-40;
+    [[a,"Cách cũ",cu.length,"#EF4444","#F97316"],[b,"Sổ tay vàng",moi.length,"#6366F1","#7C3AED"]].forEach(([v,ten,n,m1,m2],i)=>{const cx=W*(i?0.7:0.3),h=(day-30)*v/mx;const g=x.createLinearGradient(0,day-h,0,day);g.addColorStop(0,m1);g.addColorStop(1,m2);x.fillStyle=g;x.beginPath();x.roundRect?x.roundRect(cx-bw/2,day-h,bw,h,10):x.rect(cx-bw/2,day-h,bw,h);x.fill();x.fillStyle="#1E1B4B";x.textAlign="center";x.font="bold 20px Segoe UI, Arial";x.fillText(n?giay(v)+" s":"—",cx,day-h-8);x.font="14px Segoe UI, Arial";x.fillText(ten+" (n = "+n+")",cx,day+22);});
+    x.strokeStyle="#C7D2FE";x.beginPath();x.moveTo(10,day);x.lineTo(W-10,day);x.stroke();
+    $("#doTomTat").innerHTML=(cu.length&&moi.length)?`<div class="chip" style="font-size:15px;background:#ECFDF5;color:#065F46">Giảm ${Math.round((1-b/a)*100)}% thời gian tìm · ${cu.length} lượt cách cũ, ${moi.length} lượt Sổ tay · ${new Set(S.doLog.map(l=>l.nguoi)).size} người đo</div>`:`<span class="phu">Cần đo cả hai cách để so sánh.</span>`;}
+  $("#doBang").innerHTML=S.doLog.length?`<table class="bang"><tr><th>Ngày</th><th>Người đo</th><th>Cách</th><th>Tài liệu</th><th>Giây</th><th></th></tr>${S.doLog.map((l,i)=>`<tr><td>${fmtNgay(l.ngay)}</td><td>${esc(l.nguoi)}</td><td>${l.cach==="cu"?"Cách cũ":"Sổ tay"}</td><td>${esc(l.tl)}</td><td><b>${giay(l.giay)}</b></td><td><button class="chip" data-xoa-do="${i}">xoá</button></td></tr>`).join("")}</table>`:`<div class="trong">Chưa có lượt đo.</div>`;
+  $$("[data-xoa-do]").forEach(b=>b.onclick=()=>{const i=+b.dataset.xoaDo,cu=S.doLog[i];S.doLog.splice(i,1);luu();veDo();bao("Đã xoá một lượt đo",()=>{S.doLog.splice(i,0,cu);luu();veDo();});});
+}
+function taiFile(ten,noiDung,kieu){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([noiDung],{type:kieu}));a.download=ten;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+$("#doXuat").onclick=()=>{const dong=["ngay,nguoi_do,cach,tai_lieu,giay"].concat(S.doLog.map(l=>[l.ngay,l.nguoi,l.cach==="cu"?"cach cu":"so tay",'"'+String(l.tl).replace(/"/g,'""')+'"',l.giay].join(",")));taiFile("do-hieu-qua-so-tay-vang.csv","﻿"+dong.join("\n"),"text/csv");ting();};
+
+/* ================= KHBD THEO MẪU TRƯỜNG (v2) ================= */
+/* Theo 3 mẫu KHBD + lời «làm rõ, lưu ý» của Trường TH&THCS Đa Phước (nạp 19/10/2026) */
+const HD_KIEU={
+  thuong:["Hoạt động Mở đầu","Hoạt động Hình thành kiến thức mới","Hoạt động Luyện tập, thực hành","Hoạt động Vận dụng, trải nghiệm"],
+  tang:["Hoạt động Mở đầu","Hoạt động Luyện tập, thực hành","Hoạt động Vận dụng, trải nghiệm"],
+  shl:["Hoạt động Mở đầu","Báo cáo tổng kết công tác tuần qua","Thảo luận các công việc của lớp trong tuần tới","Sinh hoạt theo chủ đề","Đánh giá – Kết thúc"]
+};
+const TEN_KIEU={thuong:"Bài thường",tang:"Tiết tăng cường",shl:"Sinh hoạt lớp – HĐTN"};
+let khbdTab="lap", khbdTietCho=null, khbdMonCho=null, ksMauCho=false;
+const goi=s=>`<span class="goi">[..... ${s}]</span>`;
+function kbGiaTri(){return {kieu:$("#kbKieu").value,mon:$("#kbMon").value,lop:$("#kbLop").value.trim()||"1",tiet:+$("#kbTiet").value||0,ten:$("#kbTen").value.trim(),soTiet:Math.max(1,+$("#kbSoTiet").value||1),theo:$("#kbTheo").value,tu:$("#kbTu").value,den:$("#kbDen").value};}
+function datTheoTiet(t){const p=PPCT[t-1];if(!p)return;const b=DS_BAI[p[2]];const ts=tietCuaBai(p[2]);
+  $("#kbMon").value="Toán";if($("#kbKieu").value==="shl")$("#kbKieu").value="thuong";$("#kbTiet").value=t;$("#kbTen").value=b.ten;$("#kbSoTiet").value=ts.length;
+  $("#kbTu").value=iso(ngayCuaTuan(PPCT[ts[0]-1][0],0));$("#kbDen").value=iso(ngayCuaTuan(PPCT[ts[ts.length-1]-1][0],4));}
+function datTheoMon(m,t){const M=PPCT_MON[m];const r=M&&M.ds[t-1];if(!r)return;const g=tenGoc(r[1]);let a=t,b=t;
+  while(a>1&&tenGoc(M.ds[a-2][1])===g)a--; while(b<M.ds.length&&tenGoc(M.ds[b][1])===g)b++;
+  $("#kbMon").value=M.kb;$("#kbKieu").value=(m==="hdtn"&&/sinh hoạt lớp/i.test(r[1]))?"shl":"thuong";$("#kbTiet").value=0;$("#kbTen").value=g;$("#kbSoTiet").value=Math.min(9,b-a+1);
+  $("#kbTu").value=iso(ngayCuaTuan(M.ds[a-1][0],0));$("#kbDen").value=iso(ngayCuaTuan(M.ds[b-1][0],4));}
+function ngayVN(s,kieu){if(!s)return kieu==="dai"?"ngày … tháng … năm …":"…/…/…";const [y,m,d]=s.split("-");return kieu==="dai"?`ngày ${d} tháng ${+m} năm ${y}`:`${d}/${+m}/${y}`;}
+function kbChuoi(o){
+  const sT=String(o.soTiet).padStart(2,"0");
+  const tenMon=o.kieu==="tang"?("Củng cố, tăng cường môn "+(o.mon==="Môn khác"?"…":o.mon)):(o.kieu==="shl"?"Hoạt động trải nghiệm":(o.mon==="Môn khác"?"…":o.mon));
+  const tenBai=o.kieu==="tang"&&o.mon==="Toán"&&o.ten?"Luyện tập – "+o.ten:(o.ten||"…");
+  const tTang=o.mon==="Tiếng Việt"?5:2;
+  const soTiet=o.kieu==="tang"?`${sT} (tiết …/${tTang})`:(o.theo==="tuan"&&o.tiet&&o.mon==="Toán"?`${sT} (tiết ${o.tiet})`:sT);
+  const tg=o.theo==="bai"?`từ ${ngayVN(o.tu)} đến ${ngayVN(o.den)}`:ngayVN(o.tu,"dai");
+  return {tenMon,tenBai,soTiet,tg};
+}
+function khungHTML(o){
+  const c=kbChuoi(o), lg=o.kieu==="shl"?[]:timLongGhep(o.ten), hd=HD_KIEU[o.kieu];
+  const tichHop=lg.length?`Giáo dục AI (theo phụ lục lồng ghép của trường) — <b>${lg.map(x=>x.ma.join(", ")).join("; ")}</b>: ${esc(lg.map(x=>x.yc).join(" "))}`:goi("VD: giáo dục tính tự lực, tự cường; yêu quê hương, đất nước — nếu có");
+  const hang=hd.map((ten,i)=>{
+    const pho=/Luyện tập|Vận dụng|Sinh hoạt theo/.test(ten);
+    const ai=lg.length&&/Vận dụng/.test(ten)?`<br>– Lồng ghép giáo dục AI (${lg[0].ma.join(", ")}): ${goi("GV thao tác, HS quan sát, trả lời")}`:"";
+    const tenHien=ten==="Sinh hoạt theo chủ đề"?ten+" "+goi("tên chủ đề"):ten;
+    return `<tr><td><b>${i+1}. ${tenHien}</b><br>${goi("việc GV tổ chức, câu hỏi")}${pho?`<br>– HSHTT: ${goi("")}<br>– HSCHT: ${goi("")}`:""}${ai}</td><td><br>${goi("HS trả lời, làm — ngang dòng câu hỏi")}${pho?`<br>– HSHTT: ${goi("")}<br>– HSCHT: ${goi("")}`:""}${ai?"<br>"+goi("HS nêu"):""}</td></tr>`;}).join("");
+  return `<p style="color:#64748B;font-size:12px">✅ BẢN NHÁP — thầy duyệt, điền đủ rồi xoá dòng này · lập bằng Sổ tay vàng AI theo mẫu trường</p>
+<p>${esc(S.gv.truongDu)}<br>Tổ: ${esc(S.gv.to)}<br>Họ và tên giáo viên: ${esc(S.gv.hoTen)}</p>
+<h4>KẾ HOẠCH BÀI DẠY</h4>
+<p>Môn học/hoạt động giáo dục: ${esc(c.tenMon)}; Lớp: ${esc(o.lop)}<br>Tên bài học: ${esc(c.tenBai)}; Số tiết: ${esc(c.soTiet)}<br>Thời gian thực hiện: ${esc(c.tg)}</p>
+<p><b>1. Yêu cầu cần đạt</b></p>
+<p><b>1.1. Năng lực đặc thù</b><br>${goi("theo yêu cầu cần đạt của bài trong SGV")}</p>
+<p><b>1.2. Năng lực chung</b><br>${goi("")}</p>
+<p><b>1.3. Phẩm chất</b><br>${goi("")}</p>
+${o.kieu==="tang"?"":`<p><b>1.4. Tích hợp</b><br>${tichHop}</p>`}
+<p><b>2. Đồ dùng dạy học</b></p>
+<p><b>2.1. Giáo viên</b><br>${goi("chỉ ghi đồ dùng riêng của tiết này — không ghi SGK, SGV, bài giảng điện tử")}</p>
+<p><b>2.2. Học sinh</b><br>${goi("không ghi SGK, sách bài tập, bảng con")}</p>
+<p><b>3. Các hoạt động dạy học chủ yếu</b></p>
+<table><tr><th>Hoạt động của giáo viên</th><th>Hoạt động của học sinh</th></tr>${hang}</table>
+<p><b>4. Điều chỉnh sau bài dạy</b><br>………………………………………………………………………………..<br>………………………………………………………………………………..</p>`;
+}
+function kbVe(){
+  const o=kbGiaTri(); $("#kbXem").innerHTML=khungHTML(o);
+  const lg=o.kieu==="shl"?[]:timLongGhep(o.ten);
+  $("#kbAi").innerHTML=lg.length?`<div class="ai-goi" style="margin-top:0"><b style="color:#6D28D9">🤖 Bài này có trong phụ lục lồng ghép giáo dục AI của trường</b>${lg.map(x=>`<div style="margin-top:6px"><span class="chip chip-ai">${x.ma.join(", ")}</span> <small>${esc(x.mon)} — ${esc(x.bai)}</small></div>`).join("")}<small class="phu">Máy đã ghi mã vào mục 1.4 Tích hợp và hoạt động Vận dụng. Ở lớp 1: GV thao tác, HS không tự dùng công cụ AI.</small></div>`:`<small class="phu">Bài này không có trong phụ lục lồng ghép AI lớp 1 của trường.</small>`;
+  const tc=$("#kbTiet").closest("div"); tc.style.opacity=o.mon==="Toán"&&o.kieu!=="shl"?"1":".45";
+}
+VE["khbd"]=()=>{
+  $("#khbdTab").innerHTML=[["lap","📝 Lập khung KHBD"],["soat","🛡️ Soát KHBD trước khi nộp"]].map(([k,t])=>`<button class="chip ${khbdTab===k?"dang":""}" data-kbtab="${k}" style="font-size:15px;padding:8px 14px">${t}</button>`).join("");
+  $$("[data-kbtab]").forEach(b=>b.onclick=()=>{khbdTab=b.dataset.kbtab;VE.khbd();});
+  $("#khbdLap").style.display=khbdTab==="lap"?"":"none"; $("#khbdSoat").style.display=khbdTab==="soat"?"":"none";
+  if(!$("#kbTiet").options.length){$("#kbTiet").innerHTML=`<option value="0">— không theo PPCT —</option>`+PPCT.map((p,i)=>`<option value="${i+1}">Tiết ${i+1} · tuần ${p[0]}: ${esc(p[1])}</option>`).join("");
+    datTheoTiet(PPCT.findIndex(p=>p[0]===tuanCua(HOM_NAY))+1);}
+  if(khbdTietCho){datTheoTiet(khbdTietCho);khbdTietCho=null;}
+  if(khbdMonCho){datTheoMon(khbdMonCho.m,khbdMonCho.t);khbdMonCho=null;}
+  kbVe();
+  if(ksMauCho){ksMauCho=false;$("#ksVan").value=VI_DU_LOI;$("#ksKieu").value="thuong";chaySoat($("#ksVan").value,null);}
+};
+["#kbKieu","#kbMon","#kbLop","#kbTen","#kbSoTiet","#kbTheo","#kbTu","#kbDen"].forEach(s=>{$(s).addEventListener("input",kbVe);$(s).addEventListener("change",kbVe);});
+$("#kbTiet").addEventListener("change",()=>{const t=+$("#kbTiet").value;if(t)datTheoTiet(t);kbVe();});
+$("#kbTai").onclick=()=>{const o=kbGiaTri();const loi=soatRieng(o.ten);if(loi.length){bao("🔒 "+loi[0]);ting(false);return;}
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>KHBD</title><style>@page WordSection1{size:21cm 29.7cm;margin:2cm 2cm 2cm 3cm}div.WordSection1{page:WordSection1}body{font-family:"Times New Roman",serif;font-size:14pt;line-height:1.3}p{margin:0 0 6pt}h4{text-align:center;font-size:14pt;margin:6pt 0}table{border-collapse:collapse;width:100%}td,th{border:1px solid #000;padding:4pt;vertical-align:top;font-size:14pt}th{text-align:center}.goi{color:#B45309}</style></head><body><div class="WordSection1">${khungHTML(o)}</div></body></html>`;
+  const ten="KHBD "+(o.mon||"")+" lop "+o.lop+" - "+(o.ten||"bai").replace(/[\\/:*?"<>|]/g,"").slice(0,60);
+  taiFile(ten+".doc","﻿"+html,"application/msword"); ting(); bao("⬇ Đã tải khung Word — mở bằng Word, điền nội dung rồi lưu lại .docx");};
+$("#kbLenh").onclick=()=>{const o=kbGiaTri();const c=kbChuoi(o);const lg=o.kieu==="shl"?[]:timLongGhep(o.ten);
+  AI_VIEC.khbd.o[0][2]=c.tenBai; AI_VIEC.khbd.o[1][2]=c.tenMon; AI_VIEC.khbd.o[2][2]=o.lop; AI_VIEC.khbd.o[3][2]=c.soTiet;
+  AI_VIEC.khbd.o[4][2]=[TEN_KIEU[o.kieu],...Object.values(TEN_KIEU).filter(x=>x!==TEN_KIEU[o.kieu])];
+  AI_VIEC.khbd.o[5][2]=lg.length?lg.map(x=>x.ma.join(", ")+": "+x.yc).join(" "):"không có";
+  aiDang="khbd"; location.hash="ai";};
+$("#kbSoat").onclick=()=>{const o=kbGiaTri();$("#ksVan").value=$("#kbXem").innerText;$("#ksKieu").value=o.kieu;khbdTab="soat";VE.khbd();chaySoat($("#ksVan").value,null);};
+
+/* ---- đọc .docx ngay trên máy (không thư viện, không mạng) ---- */
+async function docDocx(file){
+  const buf=new Uint8Array(await file.arrayBuffer()),dv=new DataView(buf.buffer),td=new TextDecoder();
+  let e=-1;for(let i=buf.length-22;i>=Math.max(0,buf.length-65557);i--){if(dv.getUint32(i,true)===0x06054b50){e=i;break;}}
+  if(e<0)throw new Error("Không phải file .docx");
+  const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);
+  for(let k=0;k<n;k++){const met=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true);
+    const ten=td.decode(buf.subarray(p+46,p+46+nl));
+    if(ten==="word/document.xml"){const a=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true);const d=buf.subarray(a,a+cs);
+      if(met===0)return td.decode(d);
+      if(typeof DecompressionStream==="undefined")throw new Error("Trình duyệt này chưa giải nén được .docx");
+      return await new Response(new Blob([d]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();}
+    p+=46+nl+xl+cl;}
+  throw new Error("Không thấy nội dung Word trong file");
+}
+function xmlChu(x){return x.replace(/<w:tab\/>/g,"\t").replace(/<w:br[^>]*\/>/g,"\n").replace(/<\/w:p>/g,"\n").replace(/<\/w:tc>/g," | ").replace(/<[^>]+>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,"&").replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n");}
+function xmlCauTruc(x){const hinh=(x.match(/<w:drawing|<w:pict/g)||[]).length;
+  const hang=(x.match(/<w:tr[ >][\s\S]*?<\/w:tr>/g)||[]).map(r=>(r.match(/<w:tc[ >][\s\S]*?<\/w:tc>/g)||[]).map(c=>xmlChu(c).replace(/\|/g,"").trim()));
+  return {hinh,hang};}
+$("#ksFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  try{const x=await docDocx(f);const v=xmlChu(x);$("#ksVan").value=v.trim();chaySoat(v,xmlCauTruc(x),f.name);ting();}
+  catch(err){ting(false);bao("📂 "+err.message+" — thầy mở Word, chọn tất cả (Ctrl+A), chép rồi dán vào ô.");}
+  e.target.value="";};
+$("#ksChay").onclick=()=>{const v=$("#ksVan").value;if(!v.trim()){bao("Thầy dán KHBD hoặc mở file .docx trước nhé");ting(false);return;}chaySoat(v,null);};
+$("#ksMau").onclick=()=>{$("#ksVan").value=VI_DU_LOI;$("#ksKieu").value="thuong";chaySoat(VI_DU_LOI,null);};
+
+/* ---- máy soát theo luật của trường ---- */
+const TU_KHONG_GHI=[
+  ["muc tieu","«Mục tiêu»","ghi «Yêu cầu cần đạt»"],["muc dich yeu cau","«Mục đích yêu cầu»","ghi «Yêu cầu cần đạt»"],
+  ["chuan bi","«Chuẩn bị»","ghi «Đồ dùng dạy học»"],["tien trinh","«Tiến trình»","ghi «Các hoạt động dạy học chủ yếu»"],["quy trinh","«Quy trình»","ghi «Các hoạt động dạy học chủ yếu»"],
+  ["kiem tra bai cu","«Kiểm tra bài cũ»","ghi đúng tên hoạt động (Hoạt động Mở đầu…)"],["cung co dan do","«Củng cố, dặn dò»","ghi đúng tên hoạt động (Hoạt động Vận dụng, trải nghiệm…)"],["gioi thieu bai","«Giới thiệu bài»","gộp vào Hoạt động Mở đầu, không ghi riêng"]
+];
+const DO_DUNG_THUA=[["sach giao khoa","SGK"],["sgk","SGK"],["sach giao vien","SGV"],["sgv","SGV"],["bai giang dien tu","bài giảng điện tử"],["sach bai tap","sách bài tập"],["vo bai tap","vở bài tập"],["bang con","bảng con"]];
+const TEN_CU={"mo dau":["khoi dong"],"hinh thanh kien thuc moi":["kham pha","hinh thanh kien thuc"],"luyen tap thuc hanh":["luyen tap","thuc hanh"],"van dung trai nghiem":["van dung"]};
+function chuanHoa(s){return boDau(s).replace(/[^a-z0-9\n]/g," ");} /* giữ nguyên độ dài để tô chỗ sai */
+function timCum(nv,cum){const re=new RegExp("(^|[^a-z0-9])("+cum.split(" ").join("[^a-z0-9\\n]+")+")(?=[^a-z0-9]|$)","g");const kq=[];let m;while((m=re.exec(nv))){kq.push([m.index+m[1].length,m.index+m[0].length]);}return kq;}
+function chaySoat(van,ct,tenFile){
+  const kieu=$("#ksKieu").value, nv=chuanHoa(van.replace(/\[\.{3,}[^\]\n]*\]/g,x=>"[".padEnd(x.length,"."))), /* bỏ qua lời nhắc [..... ] trong khung */ bd=boDau(van), D=[], to=[];
+  const them=(nhom,muc,ten,goiY)=>D.push({nhom,muc,ten,goiY});
+  const co=c=>timCum(nv,c).length>0;
+  /* 1. đầu trang */
+  const DAU=[["truong","Tên trường"],["to","Tổ"],["ho va ten giao vien","Họ và tên giáo viên"],["ke hoach bai day","Tiêu đề KẾ HOẠCH BÀI DẠY"],["mon hoc hoat dong giao duc","Môn học/hoạt động giáo dục"],["lop","Lớp"],["ten bai hoc","Tên bài học"],["so tiet","Số tiết"],["thoi gian thuc hien","Thời gian thực hiện"]];
+  DAU.forEach(([c,t])=>co(c)?them("Đầu trang","dat",t):them("Đầu trang","loi",t,"Thiếu dòng «"+t+"» theo mẫu trường"));
+  const mST=bd.match(/so tiet\s*:?\s*([^\n;]*)/); if(mST){if(/\d/.test(mST[1]))them("Đầu trang","dat","Số tiết đã ghi: «"+mST[1].trim().slice(0,30)+"»");else them("Đầu trang","canh","Số tiết chưa điền","Theo tuần: «Số tiết: 02 (tiết 37)» · theo bài: «Số tiết: 02»");}
+  const mTG=bd.match(/thoi gian thuc hien\s*:?\s*([^\n]*)/); if(mTG){const g=mTG[1];if(/tu\s*\d{1,2}\/\d{1,2}\/\d{4}\s*den\s*\d{1,2}\/\d{1,2}\/\d{4}/.test(g)||/ngay\s*\d{1,2}\s*thang\s*\d{1,2}\s*nam\s*\d{4}/.test(g))them("Đầu trang","dat","Thời gian thực hiện ghi đúng kiểu mẫu");else them("Đầu trang","canh","Thời gian thực hiện chưa điền đúng kiểu","«từ 07/9/2026 đến 14/9/2026» (theo bài) hoặc «ngày 07 tháng 9 năm 2026» (theo tuần)");}
+  /* 2. bố cục */
+  const BC=[["yeu cau can dat","1. Yêu cầu cần đạt"],["nang luc dac thu","1.1. Năng lực đặc thù"],["nang luc chung","1.2. Năng lực chung"],["pham chat","1.3. Phẩm chất"],["do dung day hoc","2. Đồ dùng dạy học"],["cac hoat dong day hoc chu yeu","3. Các hoạt động dạy học chủ yếu"],["dieu chinh sau bai day","4. Điều chỉnh sau bài dạy"]];
+  BC.forEach(([c,t])=>co(c)?them("Bố cục","dat",t):them("Bố cục","loi",t,"Thiếu mục «"+t+"»"));
+  if(kieu!=="tang")co("tich hop")?them("Bố cục","dat","1.4. Tích hợp"):them("Bố cục","canh","Chưa có 1.4. Tích hợp","Mẫu chung và mẫu sinh hoạt lớp có mục 1.4 Tích hợp");
+  /* 3. hoạt động */
+  HD_KIEU[kieu].forEach((ten,i)=>{const c=chuanHoa(ten).replace(/\s+/g," ").trim();
+    if(co(c))return them("Hoạt động","dat",(i+1)+". "+ten);
+    const goc=c.replace(/^hoat dong /,"");const cu=(TEN_CU[goc]||[]).find(x=>co(x));
+    them("Hoạt động","loi",(i+1)+". "+ten,cu?"Đang ghi «"+(x=>van.slice(x[0],x[1]))(timCum(nv,cu)[0])+"» — trường dặn ghi đúng tên «"+ten+"»":"Thiếu hoạt động «"+ten+"» (ghi đúng tên)");
+    if(cu)timCum(nv,cu).forEach(x=>to.push(x));});
+  /* 4. từ trường dặn không ghi */
+  let soTu=0;TU_KHONG_GHI.forEach(([c,t,g])=>{const v=timCum(nv,c);if(v.length){soTu+=v.length;v.forEach(x=>to.push(x));them("Từ trường dặn không ghi","loi",t+" ("+v.length+" chỗ)","Không ghi "+t+" — "+g);}});
+  if(!soTu)them("Từ trường dặn không ghi","dat","Không dùng «mục tiêu», «chuẩn bị», «tiến trình», «kiểm tra bài cũ», «củng cố, dặn dò», «giới thiệu bài»");
+  /* 5. đồ dùng ghi thừa */
+  const a=timCum(nv,"do dung day hoc")[0]||timCum(nv,"chuan bi")[0], b=timCum(nv,"cac hoat dong day hoc")[0]||timCum(nv,"tien trinh")[0];
+  if(a){const tu=a[1],den=b&&b[0]>tu?b[0]:Math.min(nv.length,tu+600);const doan=nv.slice(tu,den);const thay=new Set();
+    DO_DUNG_THUA.forEach(([c,t])=>timCum(doan,c).forEach(x=>{thay.add(t);to.push([x[0]+tu,x[1]+tu]);}));
+    thay.size?them("Đồ dùng dạy học","loi","Ghi thừa: "+[...thay].join(", "),"Trường dặn: không ghi SGK, SGV, bài giảng điện tử, sách bài tập, bảng con — đồ dùng hằng ngày thì bỏ"):them("Đồ dùng dạy học","dat","Không ghi thừa SGK, SGV, bảng con…");}
+  /* 6. phân hoá */
+  const t1=co("hshtt")||co("hoan thanh tot"), t2=co("hscht")||co("chua hoan thanh");
+  t1&&t2?them("Phân hoá","dat","Có phân hoá HSHTT và HSCHT"):them("Phân hoá","loi","Chưa phân hoá "+(t1?"HSCHT":t2?"HSHTT":"HSHTT, HSCHT"),"Trường dặn: nhớ phân hoá HS hoàn thành tốt (HSHTT) và HS chưa hoàn thành (HSCHT)");
+  /* 7. GV – HS tương xứng (đọc được bảng trong .docx) */
+  if(ct&&ct.hang.length){const lech=[];ct.hang.forEach((h,i)=>{if(h.length===2&&i>0&&h[0].replace(/[.…\s]/g,"").length>25&&h[1].replace(/[.…\s]/g,"").length<6)lech.push(i+1);});
+    lech.length?them("GV – HS tương xứng","canh","Hàng "+lech.join(", ")+": cột Học sinh gần như trống","GV hỏi gì thì HS trả lời ngang dòng"):them("GV – HS tương xứng","dat","Các hàng hoạt động đều có cột Học sinh");}
+  if(ct)ct.hinh>3?them("Hình ảnh","canh","Có "+ct.hinh+" hình chèn","Trường dặn hạn chế chèn hình vào bảng (KHBD rất dài)"):ct&&them("Hình ảnh","dat",ct.hinh?"Chỉ "+ct.hinh+" hình chèn":"Không chèn hình");
+  /* 8. lồng ghép AI */
+  const mTB=van.match(/T[êe]n b[àa]i h[ọo]c\s*:?\s*([^\n;]*)/i);const tenBai=mTB?mTB[1]:"";const lg=kieu==="shl"?[]:timLongGhep(tenBai);
+  if(lg.length){const ma=lg.flatMap(x=>x.ma);const thieu=ma.filter(m=>!van.includes(m));
+    thieu.length?them("Lồng ghép giáo dục AI","canh","Bài có trong phụ lục: chưa ghi "+thieu.join(", "),"Ghi mã vào 1.4 Tích hợp (theo phụ lục của trường)"):them("Lồng ghép giáo dục AI","dat","Đã ghi mã "+ma.join(", "));}
+  /* 9. dữ liệu riêng */
+  const rieng=soatRieng(van);rieng.length?them("Dữ liệu học sinh","canh",rieng.join("; "),"Nếu là tên học sinh thì đổi sang mã HS01…"):them("Dữ liệu học sinh","dat","Không thấy họ tên, số điện thoại, ngày sinh");
+  veSoat(D,van,to,tenFile);
+}
+function veSoat(D,van,to,tenFile){
+  const dat=D.filter(d=>d.muc==="dat").length, loi=D.filter(d=>d.muc==="loi").length, canh=D.filter(d=>d.muc==="canh").length, tong=D.length, pt=Math.round(dat/tong*100);
+  const r=46,C=2*Math.PI*r, mau=loi?"#DC2626":canh?"#D97706":"#059669";
+  let h=`<div class="soat-tong"><svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="${r}" stroke="#E0E7FF" stroke-width="14" fill="none"/><circle cx="60" cy="60" r="${r}" stroke="${mau}" stroke-width="14" fill="none" stroke-dasharray="${C*dat/tong} ${C}" transform="rotate(-90 60 60)" stroke-linecap="round"/><text x="60" y="58" text-anchor="middle" font-size="26" font-weight="800" fill="#1E1B4B">${pt}%</text><text x="60" y="78" text-anchor="middle" font-size="11" fill="#5B5F86">đúng mẫu</text></svg>
+    <div style="flex:1"><h3 style="margin:0">${loi?"🔴 Cần sửa trước khi nộp":canh?"🟡 Gần đạt — xem lưu ý":"🟢 Đúng mẫu trường"}</h3><p style="margin:6px 0 0">${tenFile?"📄 "+esc(tenFile)+" · ":""}<b>${dat}</b>/${tong} mục đạt · <b style="color:#DC2626">${loi}</b> lỗi · <b style="color:#D97706">${canh}</b> lưu ý</p><small class="phu">Máy soát hình thức theo mẫu của trường; nội dung chuyên môn thầy tự duyệt.</small></div></div>`;
+  ["loi","canh","dat"].forEach(m=>D.filter(d=>d.muc===m).forEach(d=>{h+=`<div class="soat-dong ${m}"><span style="font-size:18px">${m==="loi"?"❌":m==="canh"?"⚠️":"✅"}</span><div><b>${esc(d.nhom)}:</b> ${esc(d.ten)}${d.goiY?`<small>👉 ${esc(d.goiY)}</small>`:""}</div></div>`;}));
+  $("#ksKq").innerHTML=h;
+  /* tô chỗ sai trong văn bản */
+  to.sort((a,b)=>a[0]-b[0]);let out="",p=0;to.forEach(([a,b])=>{if(a<p)return;out+=esc(van.slice(p,a))+`<mark class="loi">`+esc(van.slice(a,b))+"</mark>";p=b;});out+=esc(van.slice(p));
+  $("#ksXem").innerHTML=to.length?`<b>Chỗ cần sửa được tô đỏ:</b><div class="xem-van" style="margin-top:6px">${out}</div>`:"";
+  S.soatLog=S.soatLog||[];S.soatLog.push({ngay:iso(new Date()),dat,tong,loi,canh});if(S.soatLog.length>200)S.soatLog.shift();luu();
+}
+const VI_DU_LOI=`Trường Tiểu học và Trung học cơ sở Đa Phước
+Tổ: 1
+Họ và tên giáo viên: Trần Hữu Hạnh
+KẾ HOẠCH BÀI DẠY
+Môn học/hoạt động giáo dục: Toán; Lớp: 1
+Tên bài học: Khối lập phương, khối hộp chữ nhật; Số tiết: 02
+Thời gian thực hiện: ngày.. tháng.. năm..
+I. Mục tiêu
+1. Năng lực đặc thù: [.....]
+2. Năng lực chung: [.....]
+3. Phẩm chất: [.....]
+II. Chuẩn bị
+- GV: SGK, bài giảng điện tử, mô hình khối lập phương, khối hộp chữ nhật.
+- HS: SGK, bảng con, hộp giấy mang từ nhà.
+III. Tiến trình dạy học
+1. Khởi động – Kiểm tra bài cũ: [.....]
+2. Hoạt động Hình thành kiến thức mới: [.....]
+3. Luyện tập: [.....]
+4. Củng cố, dặn dò: [.....]
+IV. Điều chỉnh sau bài dạy
+[.....]`;
+
+/* sao lưu */
+VE["sao-luu"]=()=>{$("#lanSaoLuu").textContent=S.saoLuu?"Lần gần nhất: "+new Date(S.saoLuu).toLocaleString("vi-VN"):"Chưa sao lưu lần nào.";$("#gvTen").value=S.gv.ten;$("#gvTruong").value=S.gv.truong;};
+$("#nutSaoLuu").onclick=()=>{S.saoLuu=new Date().toISOString();luu();taiFile("so-tay-vang-"+iso(new Date())+".json",JSON.stringify(S,null,1),"application/json");ting();phaoGiay();VE["sao-luu"]();bao("Đã sao lưu — cất file vào Drive của thầy nhé");};
+$("#fileNhap").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.docs))throw 0;const cu=S;S=d;nangCap();luu();hocLai();ting();bao("Đã nhập lại "+d.docs.length+" tài liệu",()=>{S=cu;luu();hocLai();di(manDang);});di(manDang);}catch(x){ting(false);bao("File không đúng định dạng sao lưu của Sổ tay");}};r.readAsText(f);};
+$("#nutXoaMau").onclick=()=>{const cu=JSON.stringify(S);S.docs=S.docs.filter(d=>!d.mau);S.viec=S.viec.filter(v=>!v.mau);luu();hocLai();bao("Đã xoá dữ liệu mẫu",()=>{S=JSON.parse(cu);luu();hocLai();di(manDang);});di(manDang);};
+$("#nutLuuGv").onclick=()=>{S.gv.ten=$("#gvTen").value.trim()||S.gv.ten;S.gv.truong=$("#gvTruong").value.trim()||S.gv.truong;luu();ting();veChan();bao("Đã lưu thông tin");};
+function veChan(){$("#chanGv").innerHTML=`<b>${esc(S.gv.ten)}</b><br>${esc(S.gv.truong)}<br><span style="opacity:.7">Dữ liệu chỉ ở máy này</span>`;}
+
+/* ================= KHỞI ĐỘNG + CHẾ ĐỘ CHỤP ================= */
+function docHash(){
+  const h=decodeURIComponent(location.hash.slice(1)); const [man,...ts]=h.split("&"); const p={};ts.forEach(t=>{const [k,...v]=t.split("=");p[k]=v.join("=");});
+  if(p.chup==="1"){CHUP=true;document.body.classList.add("chup");}
+  if(p.q!=null){$("#oTim").value=p.q;}
+  if(p.tiet&&man==="khbd")khbdTietCho=+p.tiet; if(p.mon&&man==="khbd"&&p.mt)khbdMonCho={m:p.mon,t:+p.mt}; if(p.mon&&man==="bai")monBai=p.mon; if(p.tab)khbdTab=p.tab; if(p.mau==="1")ksMauCho=true; if(p.tuan)tuanXem=+p.tuan;
+  if(p.loai)locLoaiDang=p.loai; if(p.ngan)nganLoc=p.ngan; if(p.ai)aiDang=p.ai; if(p.lop)lopDang=p.lop; if(p.hs)hsNhay=p.hs;
+  if(man==="them"){di("kho");moThem(null,p.ten||"");return;}
+  $$(".lop-phu").forEach(l=>l.classList.remove("mo"));
+  di(VE[man]?man:"tong-quan");
+}
+hocLai(); veChan(); $("#soKho").textContent=S.docs.length;
+addEventListener("hashchange",docHash); docHash();
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$$(".lop-phu").forEach(l=>l.classList.remove("mo"));if(e.key==="/"&&document.activeElement.tagName!=="INPUT"&&document.activeElement.tagName!=="TEXTAREA"){e.preventDefault();$("#oTim").focus();}});
+</script>
+</body>
+</html>
